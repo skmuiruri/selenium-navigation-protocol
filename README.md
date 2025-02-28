@@ -37,1043 +37,1774 @@ By encapsulating navigation logic, browser state, and interaction results in an 
 
 
 
-`selenium-navigation-protocol` is a lightweight library designed to simplify browser automation with Selenium. It offers a dialogue-style approach, enabling you to define your navigation steps in a clear and declarative way.
+[//]: # (`selenium-navigation-protocol` is a lightweight library designed to simplify browser automation with Selenium. It offers a dialogue-style approach, enabling you to define your navigation steps in a clear and declarative way.)
 
- * A [RFC 3986](https://www.ietf.org/rfc/rfc3986.txt) compliant [parser](#parsing) to parse URLs and URNs from Strings
- * URL [Builders](#building-urls) to create URLs from scratch
- * Ability to transform query strings with methods such as [filterQuery](#filterquery) and [mapQuery](#mapquery)
- * Ability to [replace](#replacing-query-string-parameters) and [remove](#removing-query-string-parameters) query string parameters
- * Ability to extract TLDs and [public suffixes](#public-suffixes) such as `.com` and `.co.uk` from hosts
- * Ability to render URLs in [punycode](#punycode)
- * Ability to [parse](#parsing-ips) IPv6 and IPv4 addresses
- * Support for [custom encoding](#custom-encoding) such as encoding [spaces as pluses](#encoding-spaces-as-pluses)
- * Support for [protocol relative urls](#protocol-relative-urls)
- * Support for [user information](#user-information) e.g. `ftp://user:password@mysite.com`
- * Support for [URNs](#parse-a-urn)
- * Support for [mailto](#mailto) URLs
- * Support for [data](#data-urls) URLs as defined in [RFC2397](https://tools.ietf.org/html/rfc2397)
- * Support for [git](#gitscp-style-urls) scp-like URLs
- * Support for [Scala.js](#scalajs-support)
- * Support for [cats](#cats-support)
- * No dependencies on existing web frameworks
+[//]: # ()
+[//]: # ( * A [RFC 3986]&#40;https://www.ietf.org/rfc/rfc3986.txt&#41; compliant [parser]&#40;#parsing&#41; to parse URLs and URNs from Strings)
 
-To include it in your SBT project from maven central:
+[//]: # ( * URL [Builders]&#40;#building-urls&#41; to create URLs from scratch)
 
-```scala
-"com.indoorvivants" %% "scala-uri" % "4.1.0"
-```
+[//]: # ( * Ability to transform query strings with methods such as [filterQuery]&#40;#filterquery&#41; and [mapQuery]&#40;#mapquery&#41;)
 
-## Migration Guides
+[//]: # ( * Ability to [replace]&#40;#replacing-query-string-parameters&#41; and [remove]&#40;#removing-query-string-parameters&#41; query string parameters)
 
- * [4.0.0+](#3xx-to-4xx)
- * [3.0.0+](#2xx-to-3xx)
- * [2.0.0+](#1xx-to-2xx)
- * [Older versions](#1xx-to-15x)
+[//]: # ( * Ability to extract TLDs and [public suffixes]&#40;#public-suffixes&#41; such as `.com` and `.co.uk` from hosts)
 
-There are also demo projects for both [scala](https://github.com/lemonlabsuk/scala-uri-demo) and [Scala.js](https://github.com/lemonlabsuk/scala-uri-scalajs-example) to help you get up and running quickly.
+[//]: # ( * Ability to render URLs in [punycode]&#40;#punycode&#41;)
 
-## Parsing
+[//]: # ( * Ability to [parse]&#40;#parsing-ips&#41; IPv6 and IPv4 addresses)
 
-### Parse a URL
+[//]: # ( * Support for [custom encoding]&#40;#custom-encoding&#41; such as encoding [spaces as pluses]&#40;#encoding-spaces-as-pluses&#41;)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.Url
+[//]: # ( * Support for [protocol relative urls]&#40;#protocol-relative-urls&#41;)
 
-val url = Url.parse("https://www.scala-lang.org")
-```
+[//]: # ( * Support for [user information]&#40;#user-information&#41; e.g. `ftp://user:password@mysite.com`)
 
-The returned value has type `Url` with an underlying implementation of `AbsoluteUrl`, `RelativeUrl`,
-`UrlWithoutAuthority`, `ProtocolRelativeUrl` or `DataUrl`. If you know your URL will always be one of these types, you can
-use the following `parse` methods to get a more specific return type
+[//]: # ( * Support for [URNs]&#40;#parse-a-urn&#41;)
 
-```scala mdoc:reset
-import io.lemonlabs.uri._
+[//]: # ( * Support for [mailto]&#40;#mailto&#41; URLs)
 
-val absoluteUrl = AbsoluteUrl.parse("https://www.scala-lang.org")
-val relativeUrl = RelativeUrl.parse("/index.html")
-val mailtoUrl = UrlWithoutAuthority.parse("mailto:test@example.com")
-val protocolRelativeUrl = ProtocolRelativeUrl.parse("//www.scala-lang.org")
-val dataUrl = DataUrl.parse("data:text/plain;base64,SGVsbG8sIFdvcmxkIQ%3D%3D")
-```
+[//]: # ( * Support for [data]&#40;#data-urls&#41; URLs as defined in [RFC2397]&#40;https://tools.ietf.org/html/rfc2397&#41;)
 
-**Note:** scala-uri only supports parsing port numbers less than `Int.MaxValue`, deviating from RFC3986 which does
-not impose a limit
+[//]: # ( * Support for [git]&#40;#gitscp-style-urls&#41; scp-like URLs)
 
-## Parse a URN
+[//]: # ( * Support for [Scala.js]&#40;#scalajs-support&#41;)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.Urn
+[//]: # ( * Support for [cats]&#40;#cats-support&#41;)
 
-val urn = Urn.parse("urn:isbn:0981531687")
-urn.scheme // This is "urn"
-urn.nid // This is "isbn"
-urn.nss // This is "0981531687"
-```
+[//]: # ( * No dependencies on existing web frameworks)
 
-## Parse a URI
+[//]: # ()
+[//]: # (To include it in your SBT project from maven central:)
 
-You can use `Uri.parse` to parse URNs as well as URLs. `Url.parse` and `Urn.parse` are preferable as they return
-a more specific return type
+[//]: # ()
+[//]: # (```scala)
 
-## Building URLs
+[//]: # ("com.indoorvivants" %% "scala-uri" % "4.1.0")
 
-`Url` provides an apply method with a bunch of optional parameters that can be used to build URLs
+[//]: # (```)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.{Url, QueryString}
+[//]: # ()
+[//]: # (## Migration Guides)
 
-val url = Url(scheme = "http", host = "lemonlabs.io", path = "/opensource")
-val url2 = Url(path = "/opensource", query = QueryString.fromPairs("param1" -> "a", "param2" -> "b"))
-```
+[//]: # ()
+[//]: # ( * [4.0.0+]&#40;#3xx-to-4xx&#41;)
 
-## Transforming URLs
+[//]: # ( * [3.0.0+]&#40;#2xx-to-3xx&#41;)
 
-### mapQuery
+[//]: # ( * [2.0.0+]&#40;#1xx-to-2xx&#41;)
 
-The `mapQuery` method will transform the Query String of a URI by applying the specified `PartialFunction` to each
-Query String Parameter. Any parameters not matched in the `PartialFunction` will be left as-is.
+[//]: # ( * [Older versions]&#40;#1xx-to-15x&#41;)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.Url
+[//]: # ()
+[//]: # (There are also demo projects for both [scala]&#40;https://github.com/lemonlabsuk/scala-uri-demo&#41; and [Scala.js]&#40;https://github.com/lemonlabsuk/scala-uri-scalajs-example&#41; to help you get up and running quickly.)
 
-val uri = Url.parse("/scala-uri?p1=one&p2=2&p3=true")
+[//]: # ()
+[//]: # (## Parsing)
 
-// Results in /scala-uri?p1_map=one_map&p2_map=2_map&p3_map=true_map
-uri.mapQuery {
-  case (n, Some(v)) => (n + "_map", Some(v + "_map"))
-}
-```
+[//]: # ()
+[//]: # (### Parse a URL)
 
-The `mapQueryNames` and `mapQueryValues` provide a more convenient way to transform just Query Parameter names or values
+[//]: # ()
+[//]: # (```scala mdoc:reset)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.Url
+[//]: # (import io.lemonlabs.uri.Url)
 
-val uri = Url.parse("/scala-uri?p1=one&p2=2&p3=true")
+[//]: # ()
+[//]: # (val url = Url.parse&#40;"https://www.scala-lang.org"&#41;)
 
-uri.mapQueryNames(_.toUpperCase) // Results in /scala-uri?P1_map=one&P2=2&P3=true
-uri.mapQueryValues(_.replace("true", "false")) // Results in /scala-uri?p1=one&p2=2&p3=false
-```
+[//]: # (```)
 
-### filterQuery
+[//]: # ()
+[//]: # (The returned value has type `Url` with an underlying implementation of `AbsoluteUrl`, `RelativeUrl`,)
 
-The `filterQuery` method will remove any Query String Parameters for which the provided Function returns false
+[//]: # (`UrlWithoutAuthority`, `ProtocolRelativeUrl` or `DataUrl`. If you know your URL will always be one of these types, you can)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.Url
+[//]: # (use the following `parse` methods to get a more specific return type)
 
-val uri = Url.parse("/scala-uri?p1=one&p2=2&p3=true")
+[//]: # ()
+[//]: # (```scala mdoc:reset)
 
-// Results in /scala-uri?p2=2
-uri.filterQuery {
-  case (n, v) => n.contains("2") && v.contains("2")
-}
+[//]: # (import io.lemonlabs.uri._)
 
-uri.filterQuery(_._1 == "p1") // Results in /scala-uri?p1=one
-```
+[//]: # ()
+[//]: # (val absoluteUrl = AbsoluteUrl.parse&#40;"https://www.scala-lang.org"&#41;)
 
-The `filterQueryNames` and `filterQueryValues` provide a more convenient way to filter just by Query Parameter name or value
+[//]: # (val relativeUrl = RelativeUrl.parse&#40;"/index.html"&#41;)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.Url
+[//]: # (val mailtoUrl = UrlWithoutAuthority.parse&#40;"mailto:test@example.com"&#41;)
 
-val uri = Url.parse("/scala-uri?p1=one&p2=2&p3=true")
+[//]: # (val protocolRelativeUrl = ProtocolRelativeUrl.parse&#40;"//www.scala-lang.org"&#41;)
 
-uri.filterQueryNames(_ > "p1") // Results in /scala-uri?p2=2&p3=true
-uri.filterQueryValues(_.length == 1) // Results in /scala-uri?p2=2
-```
+[//]: # (val dataUrl = DataUrl.parse&#40;"data:text/plain;base64,SGVsbG8sIFdvcmxkIQ%3D%3D"&#41;)
 
-### collectQuery
+[//]: # (```)
 
-The `collectQuery` method will transform the Query String of a URI by applying the specified `PartialFunction` to each
-Query String Parameter. Any parameters not matched in the `PartialFunction` will be removed.
+[//]: # ()
+[//]: # (**Note:** scala-uri only supports parsing port numbers less than `Int.MaxValue`, deviating from RFC3986 which does)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.Url
+[//]: # (not impose a limit)
 
-val uri = Url.parse("/scala-uri?p1=one&p2=2&p3=true")
+[//]: # ()
+[//]: # (## Parse a URN)
 
-// Results in /scala-uri?p1_map=one_map
-uri.collectQuery {
-  case ("p1", Some(v)) => ("p1_map", Some(v + "_map"))
-}
-```
+[//]: # ()
+[//]: # (```scala mdoc:reset)
 
-### Convert an Absolute URL to a Relative URL
+[//]: # (import io.lemonlabs.uri.Urn)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.Url
+[//]: # ()
+[//]: # (val urn = Urn.parse&#40;"urn:isbn:0981531687"&#41;)
 
-val absoluteUrl = Url.parse("http://www.example.com/example?a=b")
-absoluteUrl.toRelativeUrl // This is /example?a=b
-```
+[//]: # (urn.scheme // This is "urn")
 
-### Convert a Relative URL to an Absolute URL
+[//]: # (urn.nid // This is "isbn")
 
-```scala mdoc:reset
-import io.lemonlabs.uri.Url
+[//]: # (urn.nss // This is "0981531687")
 
-val relativeUrl = Url.parse("/example?a=b")
-relativeUrl.withScheme("http").withHost("www.example.com") // This is http://www.example.com/example?a=b
-```
+[//]: # (```)
 
-## Redacting URLs
+[//]: # ()
+[//]: # (## Parse a URI)
 
-It is possible to print out redacted URLs to logs with sensitive information either removed or replaced with a placeholder
+[//]: # ()
+[//]: # (You can use `Uri.parse` to parse URNs as well as URLs. `Url.parse` and `Urn.parse` are preferable as they return)
 
-Replacing with a placeholder:
+[//]: # (a more specific return type)
 
-```scala mdoc:reset
-import io.lemonlabs.uri._
-import io.lemonlabs.uri.redact._
+[//]: # ()
+[//]: # (## Building URLs)
 
-val url = Url.parse("http://user:password@example.com?secret=123&last=yes")
+[//]: # ()
+[//]: # (`Url` provides an apply method with a bunch of optional parameters that can be used to build URLs)
 
-// This returns http://xxx:xxx@example.com?secret=xxx&last=yes
-url.toRedactedString(Redact.withPlaceholder("xxx").params("secret", "other").user().password())
-```
+[//]: # ()
+[//]: # (```scala mdoc:reset)
 
-Removing:
+[//]: # (import io.lemonlabs.uri.{Url, QueryString})
 
-```scala mdoc:reset
-import io.lemonlabs.uri._
-import io.lemonlabs.uri.redact._
+[//]: # ()
+[//]: # (val url = Url&#40;scheme = "http", host = "lemonlabs.io", path = "/opensource"&#41;)
 
-val url = Url.parse("http://user:password@example.com?secret=123&other=true")
+[//]: # (val url2 = Url&#40;path = "/opensource", query = QueryString.fromPairs&#40;"param1" -> "a", "param2" -> "b"&#41;&#41;)
 
-// This returns http://example.com
-url.toRedactedString(Redact.byRemoving.allParams().userInfo())
-```
+[//]: # (```)
 
-## Url Equality
+[//]: # ()
+[//]: # (## Transforming URLs)
 
-By default scala-uri only considers `Url`s equal if query parameters are in the same order:
+[//]: # ()
+[//]: # (### mapQuery)
 
-```scala mdoc:reset
-import io.lemonlabs.uri._
+[//]: # ()
+[//]: # (The `mapQuery` method will transform the Query String of a URI by applying the specified `PartialFunction` to each)
 
-val urlOne = Url.parse("https://example.com?a=1&b=2")
-val urlTwo = Url.parse("https://example.com?b=2&a=1")
+[//]: # (Query String Parameter. Any parameters not matched in the `PartialFunction` will be left as-is.)
 
-urlOne == urlTwo // this is false
+[//]: # ()
+[//]: # (```scala mdoc:reset)
 
-val urlThree = Url.parse("https://example.com?a=1&b=2")
+[//]: # (import io.lemonlabs.uri.Url)
 
-urlOne == urlThree // this is true
-```
+[//]: # ()
+[//]: # (val uri = Url.parse&#40;"/scala-uri?p1=one&p2=2&p3=true"&#41;)
 
-For use-cases where query parameter order is not important, the `equalsUnordered` can be used
+[//]: # ()
+[//]: # (// Results in /scala-uri?p1_map=one_map&p2_map=2_map&p3_map=true_map)
 
-```scala mdoc
-urlOne.equalsUnordered(urlTwo) // this is true
-```
+[//]: # (uri.mapQuery {)
 
-When using cats for equality testing, parameter order will also be considered by default
+[//]: # (  case &#40;n, Some&#40;v&#41;&#41; => &#40;n + "_map", Some&#40;v + "_map"&#41;&#41;)
 
-```scala mdoc
-import cats.implicits._
+[//]: # (})
 
-urlOne === urlTwo   // this is false
-urlOne === urlThree // this is true
-```
+[//]: # (```)
 
-With cats, query parameter order can be ignored for equality checks with the following import:
+[//]: # ()
+[//]: # (The `mapQueryNames` and `mapQueryValues` provide a more convenient way to transform just Query Parameter names or values)
 
-```scala mdoc
-import io.lemonlabs.uri.Url.unordered._
+[//]: # ()
+[//]: # (```scala mdoc:reset)
 
-urlOne === urlTwo   // this is true
-urlOne === urlThree // this is true
-```
+[//]: # (import io.lemonlabs.uri.Url)
 
-Note: depending on the type you are comparing, you will need to import a different cats `Eq` instance.
-The following are available:
+[//]: # ()
+[//]: # (val uri = Url.parse&#40;"/scala-uri?p1=one&p2=2&p3=true"&#41;)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.Uri.unordered._
-import io.lemonlabs.uri.Url.unordered._
-import io.lemonlabs.uri.RelativeUrl.unordered._
-import io.lemonlabs.uri.UrlWithAuthority.unordered._
-import io.lemonlabs.uri.ProtocolRelativeUrl.unordered._
-import io.lemonlabs.uri.AbsoluteUrl.unordered._
-import io.lemonlabs.uri.UrlWithoutAuthority.unordered._
-import io.lemonlabs.uri.SimpleUrlWithoutAuthority.unordered._
-import io.lemonlabs.uri.QueryString.unordered._
-```
+[//]: # ()
+[//]: # (uri.mapQueryNames&#40;_.toUpperCase&#41; // Results in /scala-uri?P1_map=one&P2=2&P3=true)
 
-## Pattern Matching URIs
+[//]: # (uri.mapQueryValues&#40;_.replace&#40;"true", "false"&#41;&#41; // Results in /scala-uri?p1=one&p2=2&p3=false)
 
-```scala mdoc:reset
-import io.lemonlabs.uri._
+[//]: # (```)
 
-val uri: Uri = Uri.parse("...")
-uri match {
-    case Uri(path) => // Matches Urns and Urls
-    case Urn(path) => // Matches Urns
-    case Url(path, query, fragment) => // Matches Urls
-    case RelativeUrl(path, query, fragment) => // Matches RelativeUrls
-    case UrlWithAuthority(authority, path, query, fragment) => // Matches AbsoluteUrl and ProtocolRelativeUrl
-    case AbsoluteUrl(scheme, authority, path, query, fragment) => // Matches AbsoluteUrl
-    case ProtocolRelativeUrl(authority, path, query, fragment) => // Matches ProtocolRelativeUrl
-    case UrlWithoutAuthority(scheme, path, query, fragment) => // Matches UrlWithoutAuthorityUrl
-    case DataUrl(mediaType, base64, data) => // Matches DataUrl
-    case ScpLikeUrl(user, host, path) => // Matches ScpLikeUrl
-}
-```
+[//]: # ()
+[//]: # (### filterQuery)
 
-### Exhaustive matching
+[//]: # ()
+[//]: # (The `filterQuery` method will remove any Query String Parameters for which the provided Function returns false)
 
-In some cases `scalac` will be able to detect instances where not all cases are being matched. For example:
+[//]: # ()
+[//]: # (```scala mdoc:reset)
 
-```scala mdoc:reset
-import io.lemonlabs.uri._
+[//]: # (import io.lemonlabs.uri.Url)
 
-Uri.parse("/test") match {
-  case u: Url => println(u.toString)
-}
-```
+[//]: # ()
+[//]: # (val uri = Url.parse&#40;"/scala-uri?p1=one&p2=2&p3=true"&#41;)
 
-results in the following compiler warning, because `Uri.parse` can return `Urn`s as well as `Url`s:
+[//]: # ()
+[//]: # (// Results in /scala-uri?p2=2)
 
-```
-<console>:15: warning: match may not be exhaustive.
-It would fail on the following input: Urn(_)
-```
+[//]: # (uri.filterQuery {)
 
-In this instance, using `Url.parse` instead of `Uri.parse` would fix this warning
+[//]: # (  case &#40;n, v&#41; => n.contains&#40;"2"&#41; && v.contains&#40;"2"&#41;)
 
+[//]: # (})
 
-## Hosts
+[//]: # ()
+[//]: # (uri.filterQuery&#40;_._1 == "p1"&#41; // Results in /scala-uri?p1=one)
 
-### Parsing Hosts
+[//]: # (```)
 
-You can parse a String representing the host part of a URI with `Host.parse`. The return type is `Host` with an
-underling implementation of `DomainName`, `IpV4` or `IpV6`.
+[//]: # ()
+[//]: # (The `filterQueryNames` and `filterQueryValues` provide a more convenient way to filter just by Query Parameter name or value)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.Host
+[//]: # ()
+[//]: # (```scala mdoc:reset)
 
-val host = Host.parse("lemonlabs.io")
-```
+[//]: # (import io.lemonlabs.uri.Url)
 
-#### Parsing IPs
+[//]: # ()
+[//]: # (val uri = Url.parse&#40;"/scala-uri?p1=one&p2=2&p3=true"&#41;)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.{IpV4, IpV6}
+[//]: # ()
+[//]: # (uri.filterQueryNames&#40;_ > "p1"&#41; // Results in /scala-uri?p2=2&p3=true)
 
-val ipv4 = IpV4.parse("13.32.214.142")
-val ipv6 = IpV6.parse("[1:2:3:4:5:6:7:8]")
-```
+[//]: # (uri.filterQueryValues&#40;_.length == 1&#41; // Results in /scala-uri?p2=2)
 
-### Matching Hosts
+[//]: # (```)
 
-```scala mdoc:reset
-import io.lemonlabs.uri._
+[//]: # ()
+[//]: # (### collectQuery)
 
-val host: Host = Host.parse("...")
-host match {
-    case Host(host) => // Matches DomainNames, IpV4s and IpV6s
-    case DomainName(host) => // Matches DomainNames
-    case ip: IpV4 => // Matches IpV4s
-    case ip: IpV6 => // Matches IpV6s
-}
-```
+[//]: # ()
+[//]: # (The `collectQuery` method will transform the Query String of a URI by applying the specified `PartialFunction` to each)
 
-## Paths
+[//]: # (Query String Parameter. Any parameters not matched in the `PartialFunction` will be removed.)
 
-### Matching Paths
+[//]: # ()
+[//]: # (```scala mdoc:reset)
 
-```scala mdoc:reset
-import io.lemonlabs.uri._
+[//]: # (import io.lemonlabs.uri.Url)
 
-val path: Path = Path.parse("...")
-path match {
-    case Path(parts) => // Matches any path
-    case AbsolutePath(parts) => // Matches any path starting with a slash
-    case RootlessPath(parts) => // Matches any path that *doesn't* start with a slash
+[//]: # ()
+[//]: # (val uri = Url.parse&#40;"/scala-uri?p1=one&p2=2&p3=true"&#41;)
 
-    case PathParts("a", "b", "c") => // Matches "/a/b/c" and "a/b/c"
-    case PathParts("a", "b", _*) => // Matches any path starting with "/a/b" or "a/b"
+[//]: # ()
+[//]: # (// Results in /scala-uri?p1_map=one_map)
 
-    case EmptyPath() => // Matches ""
-    case PathParts() => // Matches "" and "/"
+[//]: # (uri.collectQuery {)
 
-    case UrnPath("nid", "nss") => // Matches a URN Path "nid:nss"
-}
-```
+[//]: # (  case &#40;"p1", Some&#40;v&#41;&#41; => &#40;"p1_map", Some&#40;v + "_map"&#41;&#41;)
 
-## URL Percent Encoding
+[//]: # (})
 
-By Default, `scala-uri` will URL percent encode paths and query string parameters. To prevent this, you can call the `uri.toStringRaw` method:
+[//]: # (```)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.Url
+[//]: # ()
+[//]: # (### Convert an Absolute URL to a Relative URL)
 
-val uri = Url.parse("http://example.com/path with space?param=üri")
+[//]: # ()
+[//]: # (```scala mdoc:reset)
 
-uri.toString // This is: http://example.com/path%20with%20space?param=%C3%BCri
+[//]: # (import io.lemonlabs.uri.Url)
 
-uri.toStringRaw // This is: http://example.com/path with space?param=üri
-```
+[//]: # ()
+[//]: # (val absoluteUrl = Url.parse&#40;"http://www.example.com/example?a=b"&#41;)
 
-The characters that `scala-uri` will percent encode by default can be found [here](https://github.com/lemonlabsuk/scala-uri/blob/master/shared/src/main/scala/io/lemonlabs/uri/encoding/PercentEncoder.scala#L51). You can modify which characters are percent encoded like so:
+[//]: # (absoluteUrl.toRelativeUrl // This is /example?a=b)
 
-Only percent encode the hash character:
+[//]: # (```)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.config.UriConfig
-import io.lemonlabs.uri.encoding._
+[//]: # ()
+[//]: # (### Convert a Relative URL to an Absolute URL)
 
-implicit val config: UriConfig = UriConfig(encoder = percentEncode('#'))
-```
+[//]: # ()
+[//]: # (```scala mdoc:reset)
 
-Percent encode all the default chars, except the plus character:
+[//]: # (import io.lemonlabs.uri.Url)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.config.UriConfig
-import io.lemonlabs.uri.encoding._
+[//]: # ()
+[//]: # (val relativeUrl = Url.parse&#40;"/example?a=b"&#41;)
 
-implicit val config: UriConfig = UriConfig(encoder = percentEncode -- '+')
-```
+[//]: # (relativeUrl.withScheme&#40;"http"&#41;.withHost&#40;"www.example.com"&#41; // This is http://www.example.com/example?a=b)
 
-Encode all the default chars, and also encode the letters a and b:
+[//]: # (```)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.config.UriConfig
-import io.lemonlabs.uri.encoding._
+[//]: # ()
+[//]: # (## Redacting URLs)
 
-implicit val config: UriConfig = UriConfig(encoder = percentEncode ++ ('a', 'b'))
-```
+[//]: # ()
+[//]: # (It is possible to print out redacted URLs to logs with sensitive information either removed or replaced with a placeholder)
 
-### Encoding spaces as pluses
+[//]: # ()
+[//]: # (Replacing with a placeholder:)
 
-The default behaviour with scala-uri, is to encode spaces as `+` in the querystring and as `%20` elsewhere in the URL.
+[//]: # ()
+[//]: # (```scala mdoc:reset)
 
-If you instead wish spaces to be encoded as `%20` in the query, then simply add the following `implicit val` to your code:
+[//]: # (import io.lemonlabs.uri._)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.Url
-import io.lemonlabs.uri.config.UriConfig
-import io.lemonlabs.uri.encoding._
-import io.lemonlabs.uri.encoding.PercentEncoder._
+[//]: # (import io.lemonlabs.uri.redact._)
 
-implicit val config: UriConfig = UriConfig.default.copy(queryEncoder = PercentEncoder())
+[//]: # ()
+[//]: # (val url = Url.parse&#40;"http://user:password@example.com?secret=123&last=yes"&#41;)
 
-val uri = Url.parse("http://theon.github.com?test=uri with space")
-uri.toString // This is http://theon.github.com?test=uri%20with%20space
-```
+[//]: # ()
+[//]: # (// This returns http://xxx:xxx@example.com?secret=xxx&last=yes)
 
-The default behaviour with scala-uri, is to decode `+` in query string parameters to spaces and to leave it as a literal `+` elsewhere in the URL.
+[//]: # (url.toRedactedString&#40;Redact.withPlaceholder&#40;"xxx"&#41;.params&#40;"secret", "other"&#41;.user&#40;&#41;.password&#40;&#41;&#41;)
 
-If you instead wish `+` to be left as `+` in the query, then simply add the following `implicit val` to your code:
+[//]: # (```)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.Url
-import io.lemonlabs.uri.config.UriConfig
-import io.lemonlabs.uri.decoding._
+[//]: # ()
+[//]: # (Removing:)
 
-implicit val config: UriConfig = UriConfig.default.copy(queryDecoder = PercentDecoder)
+[//]: # ()
+[//]: # (```scala mdoc:reset)
 
-val uri = Url.parse("http://theon.github.com?test=uri+with+plus")
-uri.query.param("test") // This is Some("uri+with+plus")
-```
+[//]: # (import io.lemonlabs.uri._)
 
-### Custom encoding
+[//]: # (import io.lemonlabs.uri.redact._)
 
-If you would like to do some custom encoding for specific characters, you can use the `encodeCharAs` encoder.
+[//]: # ()
+[//]: # (val url = Url.parse&#40;"http://user:password@example.com?secret=123&other=true"&#41;)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.Url
-import io.lemonlabs.uri.config.UriConfig
-import io.lemonlabs.uri.encoding._
+[//]: # ()
+[//]: # (// This returns http://example.com)
 
-implicit val config: UriConfig = UriConfig(encoder = percentEncode + encodeCharAs(' ', "_"))
+[//]: # (url.toRedactedString&#40;Redact.byRemoving.allParams&#40;&#41;.userInfo&#40;&#41;&#41;)
 
-val uri = Url.parse("http://theon.github.com/uri with space")
-uri.toString // This is http://theon.github.com/uri_with_space
-```
+[//]: # (```)
 
-## URL Percent Decoding
+[//]: # ()
+[//]: # (## Url Equality)
 
-By Default, `scala-uri` will URL percent decode paths and query string parameters during parsing:
+[//]: # ()
+[//]: # (By default scala-uri only considers `Url`s equal if query parameters are in the same order:)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.Url
+[//]: # ()
+[//]: # (```scala mdoc:reset)
 
-val uri = Url.parse("http://example.com/i-have-%25been%25-percent-encoded")
+[//]: # (import io.lemonlabs.uri._)
 
-uri.toString // This is: http://example.com/i-have-%25been%25-percent-encoded
-uri.toStringRaw // This is: http://example.com/i-have-%been%-percent-encoded
-```
+[//]: # ()
+[//]: # (val urlOne = Url.parse&#40;"https://example.com?a=1&b=2"&#41;)
 
-To prevent this, you can bring the following implicit into scope:
+[//]: # (val urlTwo = Url.parse&#40;"https://example.com?b=2&a=1"&#41;)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.Url
-import io.lemonlabs.uri.config.UriConfig
-import io.lemonlabs.uri.decoding.NoopDecoder
+[//]: # ()
+[//]: # (urlOne == urlTwo // this is false)
 
-implicit val c: UriConfig = UriConfig(decoder = NoopDecoder)
+[//]: # ()
+[//]: # (val urlThree = Url.parse&#40;"https://example.com?a=1&b=2"&#41;)
 
-val uri = Url.parse("http://example.com/i-havent-%been%-percent-encoded")
+[//]: # ()
+[//]: # (urlOne == urlThree // this is true)
 
-uri.toString // This is: http://example.com/i-havent-%25been%25-percent-encoded
-uri.toStringRaw // This is: http://example.com/i-havent-%been%-percent-encoded
-```
+[//]: # (```)
 
-#### Invalid Percent Encoding
+[//]: # ()
+[//]: # (For use-cases where query parameter order is not important, the `equalsUnordered` can be used)
 
-If your Uri contains invalid percent encoding, by default scala-uri will throw a `UriDecodeException`:
+[//]: # ()
+[//]: # (```scala mdoc)
 
-```scala crash
-Url.parse("/?x=%3") // This throws a UriDecodeException
-```
+[//]: # (urlOne.equalsUnordered&#40;urlTwo&#41; // this is true)
 
-You can configure scala-uri to instead ignore invalid percent encoding and *only* percent decode correctly percent encoded values like so:
+[//]: # (```)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.Url
-import io.lemonlabs.uri.config.UriConfig
-import io.lemonlabs.uri.decoding.PercentDecoder
+[//]: # ()
+[//]: # (When using cats for equality testing, parameter order will also be considered by default)
 
-implicit val c: UriConfig = UriConfig(
-  decoder = PercentDecoder(ignoreInvalidPercentEncoding = true)
-)
-val uri = Url.parse("/?x=%3")
-uri.toString // This is /?x=%253
-uri.toStringRaw // This is /?x=%3
-```
+[//]: # ()
+[//]: # (```scala mdoc)
 
-## Replacing Query String Parameters
+[//]: # (import cats.implicits._)
 
-If you wish to replace all existing query string parameters with a given name, you can use the `Url.replaceParams()` method:
+[//]: # ()
+[//]: # (urlOne === urlTwo   // this is false)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.Url
+[//]: # (urlOne === urlThree // this is true)
 
-val uri = Url.parse("http://example.com/path?param=1")
-val newUri = uri.replaceParams("param", "2")
+[//]: # (```)
 
-newUri.toString // This is: http://example.com/path?param=2
-```
+[//]: # ()
+[//]: # (With cats, query parameter order can be ignored for equality checks with the following import:)
 
-## Removing Query String Parameters
+[//]: # ()
+[//]: # (```scala mdoc)
 
-If you wish to remove all existing query string parameters with a given name, you can use the `uri.removeParams()` method:
+[//]: # (import io.lemonlabs.uri.Url.unordered._)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.Url
+[//]: # ()
+[//]: # (urlOne === urlTwo   // this is true)
 
-val uri = Url.parse("http://example.com/path?param=1&param2=2")
-val newUri = uri.removeParams("param")
+[//]: # (urlOne === urlThree // this is true)
 
-newUri.toString // This is: http://example.com/path?param2=2
-```
+[//]: # (```)
 
-## Omitting Query Parameters with value `None`
+[//]: # ()
+[//]: # (Note: depending on the type you are comparing, you will need to import a different cats `Eq` instance.)
 
-scala-uri has support for not rendering query parameters that have a value of `None`. Set `renderQuery = ExcludeNones`
-in your `UriConfig` and make it visible in the scope where you parse/create your `Url`
+[//]: # (The following are available:)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.Url
-import io.lemonlabs.uri.config._
+[//]: # ()
+[//]: # (```scala mdoc:reset)
 
-implicit val config: UriConfig = UriConfig(renderQuery = ExcludeNones)
+[//]: # (import io.lemonlabs.uri.Uri.unordered._)
 
-val url = Url.parse("http://github.com/lemonlabsuk").addParams("a" -> Some("some"), "b" -> None)
-url.toString // This is http://github.com/lemonlabsuk?a=some
-```
+[//]: # (import io.lemonlabs.uri.Url.unordered._)
 
-## Get query string parameters
+[//]: # (import io.lemonlabs.uri.RelativeUrl.unordered._)
 
-To get the query string parameters as a `Map[String,Seq[String]]` you can do the following:
+[//]: # (import io.lemonlabs.uri.UrlWithAuthority.unordered._)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.Url
+[//]: # (import io.lemonlabs.uri.ProtocolRelativeUrl.unordered._)
 
-val uri = Url.parse("http://example.com/path?a=b&a=c&d=e")
-uri.query.paramMap // This is: Map("a" -> Vector("b", "c"), "d" -> Vector("e"))
-```
+[//]: # (import io.lemonlabs.uri.AbsoluteUrl.unordered._)
 
-## User Information
+[//]: # (import io.lemonlabs.uri.UrlWithoutAuthority.unordered._)
 
-`scala-uri` supports user information (username and password) encoded in URLs.
+[//]: # (import io.lemonlabs.uri.SimpleUrlWithoutAuthority.unordered._)
 
-Parsing URLs with user information:
+[//]: # (import io.lemonlabs.uri.QueryString.unordered._)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.Url
+[//]: # (```)
 
-val url = Url.parse("http://user:pass@host.com")
-url.user // This is Some("user")
-url.password // This is Some("pass")
-```
+[//]: # ()
+[//]: # (## Pattern Matching URIs)
 
-Modifying user information:
+[//]: # ()
+[//]: # (```scala mdoc:reset)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.AbsoluteUrl
+[//]: # (import io.lemonlabs.uri._)
 
-val url = AbsoluteUrl.parse("http://host.com")
-url.withUser("jack") // URL is now http://jack@host.com
-```
+[//]: # ()
+[//]: # (val uri: Uri = Uri.parse&#40;"..."&#41;)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.AbsoluteUrl
+[//]: # (uri match {)
 
-val url = AbsoluteUrl.parse("http://user:pass@host.com")
-url.withPassword("secret") // URL is now http://user:secret@host.com
-```
+[//]: # (    case Uri&#40;path&#41; => // Matches Urns and Urls)
 
-**Note:** that using clear text passwords in URLs is [ill advised](http://tools.ietf.org/html/rfc3986#section-3.2.1)
+[//]: # (    case Urn&#40;path&#41; => // Matches Urns)
 
-## Protocol Relative URLs
+[//]: # (    case Url&#40;path, query, fragment&#41; => // Matches Urls)
 
-[Protocol Relative URLs](http://paulirish.com/2010/the-protocol-relative-url/) are supported in `scala-uri`. A `Uri` object with a protocol of `None`, but a host of `Some(x)` will be considered a protocol relative URL.
+[//]: # (    case RelativeUrl&#40;path, query, fragment&#41; => // Matches RelativeUrls)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.Url
+[//]: # (    case UrlWithAuthority&#40;authority, path, query, fragment&#41; => // Matches AbsoluteUrl and ProtocolRelativeUrl)
 
-val uri = Url.parse("//example.com/path") // Return type is Url
-uri.schemeOption // This is: None
-uri.hostOption // This is: Some("example.com")
-```
+[//]: # (    case AbsoluteUrl&#40;scheme, authority, path, query, fragment&#41; => // Matches AbsoluteUrl)
 
-Use `ProtocolRelativeUrl.parse` if you know your URL will always be Protocol Relative:
+[//]: # (    case ProtocolRelativeUrl&#40;authority, path, query, fragment&#41; => // Matches ProtocolRelativeUrl)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.ProtocolRelativeUrl
+[//]: # (    case UrlWithoutAuthority&#40;scheme, path, query, fragment&#41; => // Matches UrlWithoutAuthorityUrl)
 
-val uri = ProtocolRelativeUrl.parse("//example.com/path") // Return type is ProtocolRelativeUrl
-uri.schemeOption // This is: None
-uri.host // This is: "example.com"
-```
+[//]: # (    case DataUrl&#40;mediaType, base64, data&#41; => // Matches DataUrl)
 
-## Character Sets
+[//]: # (    case ScpLikeUrl&#40;user, host, path&#41; => // Matches ScpLikeUrl)
 
-By default `scala-uri` uses `UTF-8` charset encoding:
+[//]: # (})
 
-```scala mdoc:reset
-import io.lemonlabs.uri.Url
+[//]: # (```)
 
-val uri = Url.parse("http://theon.github.com/uris-in-scala.html?chinese=网址")
-uri.toString // This is http://theon.github.com/uris-in-scala.html?chinese=%E7%BD%91%E5%9D%80
-```
+[//]: # ()
+[//]: # (### Exhaustive matching)
 
-This can be changed like so:
+[//]: # ()
+[//]: # (In some cases `scalac` will be able to detect instances where not all cases are being matched. For example:)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.config.UriConfig
-import io.lemonlabs.uri.Url
+[//]: # ()
+[//]: # (```scala mdoc:reset)
 
-implicit val conf: UriConfig = UriConfig(charset = "GB2312")
+[//]: # (import io.lemonlabs.uri._)
 
-val uri = Url.parse("http://theon.github.com/uris-in-scala.html?chinese=网址")
-uri.toString // This is http://theon.github.com/uris-in-scala.html?chinese=%CD%F8%D6%B7
-```
+[//]: # ()
+[//]: # (Uri.parse&#40;"/test"&#41; match {)
 
-## Subdomains
+[//]: # (  case u: Url => println&#40;u.toString&#41;)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.Url
+[//]: # (})
 
-// This returns Some("www")
-Url.parse("http://www.example.com/blah").subdomain
+[//]: # (```)
 
-// This returns Some("a.b.c")
-Url.parse("http://a.b.c.example.com/blah").subdomain
+[//]: # ()
+[//]: # (results in the following compiler warning, because `Uri.parse` can return `Urn`s as well as `Url`s:)
 
-// This returns None
-Url.parse("http://example.com/blah").subdomain
+[//]: # ()
+[//]: # (```)
 
-// This returns Vector("a", "a.b", "a.b.c", "a.b.c.example")
-Url.parse("http://a.b.c.example.com/blah").subdomains
+[//]: # (<console>:15: warning: match may not be exhaustive.)
 
-// This returns Some("a")
-Url.parse("http://a.b.c.example.com/blah").shortestSubdomain
+[//]: # (It would fail on the following input: Urn&#40;_&#41;)
 
-// This returns Some("a.b.c.example")
-Url.parse("http://a.b.c.example.com/blah").longestSubdomain
-```
+[//]: # (```)
 
-These methods return `None` or `Vector.empty` for URLs without a Host (e.g. Relative URLs)
+[//]: # ()
+[//]: # (In this instance, using `Url.parse` instead of `Uri.parse` would fix this warning)
 
-## Apex Domains
+[//]: # ()
+[//]: # ()
+[//]: # (## Hosts)
 
-The method `apexDomain` returns the [apex domain](https://help.github.com/articles/about-supported-custom-domains/#apex-domains)
-for the URL (e.g. `example.com` for `http://www.example.com/path`)
+[//]: # ()
+[//]: # (### Parsing Hosts)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.Url
+[//]: # ()
+[//]: # (You can parse a String representing the host part of a URI with `Host.parse`. The return type is `Host` with an)
 
-val uri = Url.parse("http://www.google.co.uk/blah")
-uri.apexDomain // This returns Some("google.co.uk")
-```
+[//]: # (underling implementation of `DomainName`, `IpV4` or `IpV6`.)
 
-## Public Suffixes
+[//]: # ()
+[//]: # (```scala mdoc:reset)
 
-`scala-uri` uses the list of public suffixes from [publicsuffix.org](https://publicsuffix.org) to allow you to identify
-the TLD of your absolute URIs.
+[//]: # (import io.lemonlabs.uri.Host)
 
-The `publicSuffix` method returns the longest public suffix from your URI
+[//]: # ()
+[//]: # (val host = Host.parse&#40;"lemonlabs.io"&#41;)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.Url
+[//]: # (```)
 
-val uri = Url.parse("http://www.google.co.uk/blah")
-uri.publicSuffix // This returns Some("co.uk")
-```
+[//]: # ()
+[//]: # (#### Parsing IPs)
 
-The `publicSuffixes` method returns all the public suffixes from your URI
+[//]: # ()
+[//]: # (```scala mdoc:reset)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.Url
+[//]: # (import io.lemonlabs.uri.{IpV4, IpV6})
 
-val uri = Url.parse("http://www.google.co.uk/blah")
-uri.publicSuffixes // This returns Vector("co.uk", "uk")
-```
+[//]: # ()
+[//]: # (val ipv4 = IpV4.parse&#40;"13.32.214.142"&#41;)
 
-These methods return `None` and `Vector.empty`, respectively for URLs without a Host (e.g. Relative URLs)
+[//]: # (val ipv6 = IpV6.parse&#40;"[1:2:3:4:5:6:7:8]"&#41;)
 
-## Punycode
+[//]: # (```)
 
-See [RFC 3490](http://www.ietf.org/rfc/rfc3490.txt)
+[//]: # ()
+[//]: # (### Matching Hosts)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.Url
+[//]: # ()
+[//]: # (```scala mdoc:reset)
 
-val url = Url.parse("https://はじめよう.みんな/howto.html")
-url.toStringPunycode // This returns "https://xn--p8j9a0d9c9a.xn--q9jyb4c/howto.html"
-```
+[//]: # (import io.lemonlabs.uri._)
 
-## mailto
+[//]: # ()
+[//]: # (val host: Host = Host.parse&#40;"..."&#41;)
 
-Mailto URLs are best parsed with `UrlWithoutAuthority.parse`, but can also be parsed with `Url.parse`
+[//]: # (host match {)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.UrlWithoutAuthority
+[//]: # (    case Host&#40;host&#41; => // Matches DomainNames, IpV4s and IpV6s)
 
-val mailto = UrlWithoutAuthority.parse("mailto:someone@example.com?subject=Hello")
-mailto.scheme // This is Some(mailto")
-mailto.path // This is "someone@example.com"
-mailto.query.param("subject") // This is Some("Hello")
-```
+[//]: # (    case DomainName&#40;host&#41; => // Matches DomainNames)
 
-## Data URLs
+[//]: # (    case ip: IpV4 => // Matches IpV4s)
 
-Data URLs are defined in [RFC2397](https://tools.ietf.org/html/rfc2397)
+[//]: # (    case ip: IpV6 => // Matches IpV6s)
 
-### Base64 encoded data URLs
+[//]: # (})
 
-```scala mdoc:reset
-import java.io.ByteArrayInputStream
-import io.lemonlabs.uri.DataUrl
-import javax.imageio.ImageIO
+[//]: # (```)
 
-// A data URL containing a PNG image of a red dot
-val dataUrl = DataUrl.parse("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==")
+[//]: # ()
+[//]: # (## Paths)
 
-dataUrl.scheme // This is "data"
-dataUrl.mediaType.value // This is "image/png"
-dataUrl.base64 // This is true
+[//]: # ()
+[//]: # (### Matching Paths)
 
-// Convert the image data to a java.awt.image.BufferedImage
-val image = ImageIO.read(new ByteArrayInputStream(dataUrl.data))
-```
+[//]: # ()
+[//]: # (```scala mdoc:reset)
 
-### Percent encoded data URLs
+[//]: # (import io.lemonlabs.uri._)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.DataUrl
+[//]: # ()
+[//]: # (val path: Path = Path.parse&#40;"..."&#41;)
 
-val dataUrl = DataUrl.parse("data:text/plain;charset=UTF-8;page=21,the%20data:1234,5678")
+[//]: # (path match {)
 
-dataUrl.mediaType.value // This is text/plain
-dataUrl.mediaType.charset // This is UTF-8
-dataUrl.mediaType.parameters // This is Vector("charset" -> "UTF-8", "page" -> "21")
-dataUrl.base64 // This is false
+[//]: # (    case Path&#40;parts&#41; => // Matches any path)
 
-dataUrl.dataAsString // This is "the data:1234,5678"
-```
+[//]: # (    case AbsolutePath&#40;parts&#41; => // Matches any path starting with a slash)
 
-## git/scp style URLs
+[//]: # (    case RootlessPath&#40;parts&#41; => // Matches any path that *doesn't* start with a slash)
 
-git/scp style URLs can be parsed like so:
+[//]: # ()
+[//]: # (    case PathParts&#40;"a", "b", "c"&#41; => // Matches "/a/b/c" and "a/b/c")
 
-```scala mdoc:reset
-import io.lemonlabs.uri.ScpLikeUrl
+[//]: # (    case PathParts&#40;"a", "b", _*&#41; => // Matches any path starting with "/a/b" or "a/b")
 
-val url = ScpLikeUrl.parse("git@github.com:lemonlabsuk/scala-uri.git")
-url.user // This is Some("git")
-url.host.toString // This is "github.com"
-url.path.toString // This is "lemonlabsuk/scala-uri.git"
-```
+[//]: # ()
+[//]: # (    case EmptyPath&#40;&#41; => // Matches "")
 
-Note that `ScpLikeUrl.parse`, should only be used for git URLs with scp-like syntax (with a `:`
-between the host and path). For all other git URLs, `AbsoluteUrl.parse` or `Url.parse` should
-be used:
+[//]: # (    case PathParts&#40;&#41; => // Matches "" and "/")
 
-```scala mdoc:reset
-import io.lemonlabs.uri.AbsoluteUrl
+[//]: # ()
+[//]: # (    case UrnPath&#40;"nid", "nss"&#41; => // Matches a URN Path "nid:nss")
 
-val gitUrl    = AbsoluteUrl.parse("git://github.com/lemonlabsuk/scala-uri.git")
-val gitSshUrl = AbsoluteUrl.parse("git+ssh://git@github.com/lemonlabsuk/scala-uri.git")
-val sshUrl    = AbsoluteUrl.parse("ssh://git@github.com/lemonlabsuk/scala-uri.git")
-val httpsUrl  = AbsoluteUrl.parse("https://github.com/lemonlabsuk/scala-uri.git")
-```
+[//]: # (})
 
-## Typesafe URL builder DSL
+[//]: # (```)
 
-The version of DSL which relies on the types to render urls providing better control over
-the way values would be translated to url parts.
+[//]: # ()
+[//]: # (## URL Percent Encoding)
 
-It is possible to use arbitrary types as parts of the url:
+[//]: # ()
+[//]: # (By Default, `scala-uri` will URL percent encode paths and query string parameters. To prevent this, you can call the `uri.toStringRaw` method:)
 
-### Query Strings
+[//]: # ()
+[//]: # (```scala mdoc:reset)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.typesafe._
-import io.lemonlabs.uri.typesafe.dsl._
+[//]: # (import io.lemonlabs.uri.Url)
 
-final case class Foo(a: Int, b: String)
+[//]: # ()
+[//]: # (val uri = Url.parse&#40;"http://example.com/path with space?param=üri"&#41;)
 
-object Foo {
-  implicit val traversableParams: TraversableParams[Foo] = TraversableParams.product
-}
+[//]: # ()
+[//]: # (uri.toString // This is: http://example.com/path%20with%20space?param=%C3%BCri)
 
-val uri = "http://theon.github.com/scala-uri" addParams Foo(a = 1, b = "bar")
-uri.toString //This is: http://theon.github.com/scala-uri?a=1&b=bar
-```
+[//]: # ()
+[//]: # (uri.toStringRaw // This is: http://example.com/path with space?param=üri)
 
-### Query String Values
+[//]: # (```)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.typesafe._
-import io.lemonlabs.uri.typesafe.dsl._
+[//]: # ()
+[//]: # (The characters that `scala-uri` will percent encode by default can be found [here]&#40;https://github.com/lemonlabsuk/scala-uri/blob/master/shared/src/main/scala/io/lemonlabs/uri/encoding/PercentEncoder.scala#L51&#41;. You can modify which characters are percent encoded like so:)
 
-sealed trait Bar {
-  def name: String
-}
+[//]: # ()
+[//]: # (Only percent encode the hash character:)
 
-case object A extends Bar {
-  val name: String = "A"
-}
+[//]: # ()
+[//]: # (```scala mdoc:reset)
 
-case object B extends Bar {
-  val name: String = "B"
-}
+[//]: # (import io.lemonlabs.uri.config.UriConfig)
 
-object Bar {
-  implicit val queryValue: QueryValue[Bar] = QueryValue.derive[Bar].by(_.name)
-}
+[//]: # (import io.lemonlabs.uri.encoding._)
 
-val uri = "http://theon.github.com/scala-uri" ? ("foo" -> A)
-uri.toString //This is: http://theon.github.com/scala-uri?foo=A
-```
+[//]: # ()
+[//]: # (implicit val config: UriConfig = UriConfig&#40;encoder = percentEncode&#40;'#'&#41;&#41;)
 
-### Path Parts
+[//]: # (```)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.typesafe._
-import io.lemonlabs.uri.typesafe.dsl._
+[//]: # ()
+[//]: # (Percent encode all the default chars, except the plus character:)
 
-final case class Foo(a: String, b: Int)
+[//]: # ()
+[//]: # (```scala mdoc:reset)
 
-object Foo {
-  implicit val pathPart: PathPart[Foo] = (foo: Foo) => s"${foo.a}/${foo.b}"
-}
+[//]: # (import io.lemonlabs.uri.config.UriConfig)
 
+[//]: # (import io.lemonlabs.uri.encoding._)
 
-val uri = "http://theon.github.com" / "scala-uri" / Foo(a = "user", b = 1)
-uri.toString //This is: http://theon.github.com/scala-uri/user/1
-```
+[//]: # ()
+[//]: # (implicit val config: UriConfig = UriConfig&#40;encoder = percentEncode -- '+'&#41;)
 
-### Fragments
+[//]: # (```)
 
-```scala mdoc:reset
-import io.lemonlabs.uri.typesafe._
-import io.lemonlabs.uri.typesafe.dsl._
+[//]: # ()
+[//]: # (Encode all the default chars, and also encode the letters a and b:)
 
-final case class Foo(a: String, b: Int)
-object Foo {
-  implicit val fragment: Fragment[Foo] = (foo: Foo) => Some(s"${foo.a}-${foo.b}")
-}
+[//]: # ()
+[//]: # (```scala mdoc:reset)
 
-val uri5 = "http://theon.github.com/scala-uri" `#` Foo(a = "user", b = 1)
-uri5.toString //This is: http://theon.github.com/scala-uri#user-1
-```
+[//]: # (import io.lemonlabs.uri.config.UriConfig)
 
-## Scala.js support
+[//]: # (import io.lemonlabs.uri.encoding._)
 
-See [scala-uri-scalajs-example](https://github.com/lemonlabsuk/scala-uri-scalajs-example) for usage
+[//]: # ()
+[//]: # (implicit val config: UriConfig = UriConfig&#40;encoder = percentEncode ++ &#40;'a', 'b'&#41;&#41;)
 
-## Cats Support
+[//]: # (```)
 
-scala-uri provides type class instances of `cats.Eq`, `cats.Show` and `cats.Order` for:
-`Uri `, `Url`, `RelativeUrl`, `UrlWithAuthority`, `ProtocolRelativeUrl`, `AbsoluteUrl`,
-`UrlWithoutAuthority`, `SimpleUrlWithoutAuthority`, `DataUrl`, `ScpLikeUrl`, `Urn`, `Authority`, `UserInfo`,
-`Host`, `DomainName`, `IpV4`, `IpV6`, `MediaType`, `Path`, `UrlPath`, `AbsoluteOrEmptyPath`,
-`RootlessPath`, `AbsolutePath`, `UrnPath`, `QueryString`
+[//]: # ()
+[//]: # (### Encoding spaces as pluses)
 
-The type class instances exist in the companion objects for these types.
+[//]: # ()
+[//]: # (The default behaviour with scala-uri, is to encode spaces as `+` in the querystring and as `%20` elsewhere in the URL.)
 
-## Including scala-uri your project
+[//]: # ()
+[//]: # (If you instead wish spaces to be encoded as `%20` in the query, then simply add the following `implicit val` to your code:)
 
-`scala-uri` `4.x.x` is currently built with support for Scala `3`, Scala `2.13.x`, Scala `2.12.x` and Scala.js `1.17.0+`
+[//]: # ()
+[//]: # (```scala mdoc:reset)
 
-Release builds are available in maven central. For SBT users just add the following dependency:
+[//]: # (import io.lemonlabs.uri.Url)
 
-```scala
-"com.indoorvivants" %% "scala-uri" % "4.1.0"
-```
+[//]: # (import io.lemonlabs.uri.config.UriConfig)
 
-For maven users you should use (for 2.13.x):
+[//]: # (import io.lemonlabs.uri.encoding._)
 
-```xml
-<dependency>
-    <groupId>com.indoorvivants</groupId>
-    <artifactId>scala-uri_2.13</artifactId>
-    <version>4.1.0</version>
-</dependency>
-```
+[//]: # (import io.lemonlabs.uri.encoding.PercentEncoder._)
 
-# Contributions
+[//]: # ()
+[//]: # (implicit val config: UriConfig = UriConfig.default.copy&#40;queryEncoder = PercentEncoder&#40;&#41;&#41;)
 
-Contributions to `scala-uri` are always welcome. Check out the [Contributing Guidelines](https://github.com/indoorvivants/scala-uri/blob/master/README.md)
+[//]: # ()
+[//]: # (val uri = Url.parse&#40;"http://theon.github.com?test=uri with space"&#41;)
 
-# Migration guides
+[//]: # (uri.toString // This is http://theon.github.com?test=uri%20with%20space)
 
-## 3.x.x to 4.x.x
+[//]: # (```)
 
- * Scala 3 support has been added. Scala 2.13 and 2.12 support remain
- * *Binary Incompatibility*: [4765b4e](https://github.com/lemonlabsuk/scala-uri/commit/4765b4e6714a87d53ba0ae9bf58810e1b8be63d5#diff-e33d822268175cadb9ff5e2057fac2042db550f251da28d834f13b7bb44cf09aL45)
-   removed a single `UriConfig.copy()` overload.
-   This overload existed only to maintain binary compatibility with an older version of scala-uri
-   Use the remaining `copy()` method on `UriConfig` instead
- * *Binary Incompatibility*: [4765b4e](https://github.com/lemonlabsuk/scala-uri/commit/4765b4e6714a87d53ba0ae9bf58810e1b8be63d5#diff-e33d822268175cadb9ff5e2057fac2042db550f251da28d834f13b7bb44cf09aL20)
-   removed a single `UriConfig` overloaded constructor.
-   This overload existed only to maintain binary compatibility with an older version of scala-uri
-   Use the remaining constructor or `apply` method remaining on `UriConfig` instead
+[//]: # ()
+[//]: # (The default behaviour with scala-uri, is to decode `+` in query string parameters to spaces and to leave it as a literal `+` elsewhere in the URL.)
 
-## 2.x.x to 3.x.x
+[//]: # ()
+[//]: # (If you instead wish `+` to be left as `+` in the query, then simply add the following `implicit val` to your code:)
 
- * *Backwards Incompatible*: The space character is now encoded to `+` instead of `%20` in query string parameters by default.
- * *Backwards Incompatible*: The `+` method in `io.lemonlabs.uri.encoding.UriEncoder`, now chains encoders in the opposite order to be more intuitive.
-   E.g. `a + b` will encode with encoder `a` first, followed by encoder `b`
- * *Binary Incompatibility*: The following deprecated classes have now been removed:
-    * `io.lemonlabs.uri.inet.PublicSuffixTrie`
-    * `io.lemonlabs.uri.inet.Trie`
-    * `io.lemonlabs.uri.dsl.*`
- * *Binary Incompatibility*: `Url.addParam("key", "value")` and `Url.addParam("key" -> "value")`
-   now has a return type `Self` rather than `Url`.
-   E.g. `AbsoluteUrl.addParam` now has a return type of `AbsoluteUrl` and `RelativeUrl.addParam` has a return type of `RelativeUrl`
+[//]: # ()
+[//]: # (```scala mdoc:reset)
 
-## 1.x.x to 2.x.x
+[//]: # (import io.lemonlabs.uri.Url)
 
- * scala-uri no longer depends on a JSON library.
- * *Binary Incompatibility*: The case class `UrlWithoutAuthority` has been renamed `SimpleUrlWithoutAuthority`.
-   There is now a trait called `UrlWithoutAuthority`. This trait has a companion object with `apply`, `unapply` and `parse`
-   methods, so it mostly can be used in the same way as the previous case class.
- * *Binary Incompatibility*: Parsing a Data URL will now return an instance of [`DataUrl`](#data-urls) rather than `UrlWithoutAuthority`
- * *Binary Incompatibility*: `UserInfo.user` is now of type `String` rather than `Option[String]`
- * *Binary Incompatibility*: `Authority.userInfo` is now of type `Option[UserInfo]`
- * *Binary Incompatibility*: `UserInfo.empty` method removed
- * *Binary Incompatibility*: `QueryString.fromPairOptions` removed. Use `QueryString.fromPairs` instead.
- * *Binary Incompatibility*: `Url.withQueryStringOptionValues` removed. Use `withQueryString` instead.
- * *Binary Incompatibility*: `Url.addParamsOptionValues` and `QueryString.addParamsOptionValues` have been renames to `addParams`
- * `TypesafeUrlDsl`
-    * *Binary Incompatibility*: `withParams[A: TraversableParams](params: A)` renamed to `addParams`
-    * `/(PathPart)` no longer splits the part by slash. If you want to add multiple path parts use `/(TraversablePathParts)` instead
- * Type Classes
-   * *Binary Incompatibility*: `Fragment[A].fragment` returns `Option[String]` rather than `String`
-   * *Binary Incompatibility*: `Url.withFragment` now takes argument of type `T: Fragment` rather than `String` and `Option[String]`
-     Type Class instances are provided the method can be used with `String` and `Option[String]` values just as before
-   * *Binary Incompatibility*: `Url.addPathParts` and `Url.addPathPart` now takes arguments of type `P: TraversablePathParts` or `P: PathPart` rather than `Iterable[String]` or `String`
-     Type Class instances are provided the methods can be used with `String` and `Iterable[String]` values just as before
-   * *Binary Incompatibility*: `Url.withQueryString`, `Url.addParam`, `Url.addParams`, `Url.replaceParams`, `Url.removeParams`,
-     `Url.mapQuery`, `Url.flatMapQuery`, `Url.collectQuery`, `Url.mapQueryNames` and `Url.mapQueryValues` now takes argument of type `KV: QueryKeyValue`, `K: QueryKey` or `V: QueryValue` rather than `(String, String)` or `String`
-     Type Class instances are provided the methods can be used with `(String, String)` or `String` values just as before
- * The [URL builder DSL](#url-builder-dsl) has been deprecated in favour of the [Typesafe URL builder DSL](#typesafe-url-builder-dsl)
- * `Authority.parse` no longer expects it's string argument to start with `//`, as this is not part of the Authority, it is a delimiter. See [RFC 3986](https://www.ietf.org/rfc/rfc3986.txt)
- * `UserInfo.parse` no longer expects it's string argument to end with a `@`, as this is not part of the UserInfo, it is a delimiter. See [RFC 3986](https://www.ietf.org/rfc/rfc3986.txt)
- * `QueryString.toString` no longer returns a leading `?`, as this is not part of the query string, it is a delimiter. See [RFC 3986](https://www.ietf.org/rfc/rfc3986.txt)
- * Forward slashes in paths are now percent encoded by default.
-   This means `Url.parse("/%2F/").toString` returns `"/%2F/"` rather than `///` in previous versions
-   To return to the previous behavior, you can bring a `UriConfig` like so into scope
-   ```scala mdoc:reset
-    import io.lemonlabs.uri.encoding.PercentEncoder._
-    implicit val c = UriConfig.default.copy(pathEncoder = PercentEncoder(PATH_CHARS_TO_ENCODE - '/'))
-   ```
+[//]: # (import io.lemonlabs.uri.config.UriConfig)
 
-## 1.x.x to 1.5.x
+[//]: # (import io.lemonlabs.uri.decoding._)
 
- * scala 2.11 support dropped, please upgrade to 2.12 or 2.13
+[//]: # ()
+[//]: # (implicit val config: UriConfig = UriConfig.default.copy&#40;queryDecoder = PercentDecoder&#41;)
 
-## 0.5.x to 1.x.x
+[//]: # ()
+[//]: # (val uri = Url.parse&#40;"http://theon.github.com?test=uri+with+plus"&#41;)
 
-Thanks to [@evanbennett](https://github.com/evanbennett). `1.x.x` is inspired by his fork [here](https://github.com/evanbennett/scala-uri)
-and discussion [here](https://github.com/NET-A-PORTER/scala-uri/pull/113).
+[//]: # (uri.query.param&#40;"test"&#41; // This is Some&#40;"uri+with+plus"&#41;)
 
- * Package change from `com.netaporter.uri` to `io.lemonlabs.uri`
- * The single `Uri` case class has now been replaced with a class hierarchy. Use the most specific class in this
-   hierarchy that fits your use case
- * `Uri` used to be a case class, but the replacements `Uri` and `Url` are now traits. This means they no longer
-   have a `copy` method. Use the `with` methods instead (e.g. `withHost`, `withPath` etc)
- * `host` method on `Url` now has return type `Host` rather than `String`. You may have to change `url.host` to `url.host.toString`
- * `path` method on `Url` now has return type `Path` rather than `String`. You may have to change `url.path` to `url.path.toString`
- * Changed parameter value type from `Any` to `String` in methods `addParam`, `addParams`, `replaceParams`.
-   Please now call `.toString` before passing non String types to these methods
- * Changed parameter value type from `Option[Any]` to `Option[String]` in method `replaceAll`.
-   Please now call `.toString` before passing non String types to this method
- * Query string parameters with a value of `None` will now be rendered with no equals sign by default (e.g. `?param`).
-   Previously some methods (such as `?`, `&`, `\?`, `addParam` and `addParams`) would not render parameters with a value of `None` at all.
-   In 1.x.x, this behaviour can be achieved by using the [`renderQuery`](#omitting-query-parameters-with-value-none) config option.
- * In most cases `Url.parse` should be used instead of `Uri.parse`. See all parse methods [here](#parse-a-url)
- * `scheme` is now called `schemeOption` on `Uri`. If you have an instance of `AbsoluteUrl` or `ProtocolRelativeUrl`
-   there is still `scheme` method but it returns `String` rather than `Option[String]`
- * `protocol` method has been removed from `Uri`. Use `schemeOption` instead
- * Type changed from `Seq` to `Vector` for:
-   * `subdomains`, `publicSuffixes`, `params` return type
-   * `removeAll` and `removeParams` argument types
-   * `params` field in `QueryString`
-   * `paramMap` and `pathParts` fields in `Uri`, now `Url`
- * Methods `addParam` and `addParams`  that took Option arguments are now called `addParamOptionValue` and `addParamsOptionValues`
- * Method `replaceAllParams` has been replaced with `withQueryString` or `withQueryStringOptionValues`
- * Method `removeAllParams` has been replaced with `withQueryString(QueryString.empty)`
- * Method `subdomain` has been removed from the Scala.js version. The implementation was incorrect and did not
-   match the JVM version of `subdomain`. Once public suffixes are supported for the Scala.js version, a correct
-   implementation of `subdomain` can be added
- * Implicit `UriConfig`s now need to be where your `Uri`s are parsed/constructed, rather than where they are rendered
- * Method `hostParts` has been removed from `Uri`. This method predated `publicSuffix` and `subdomain` which are more
-   useful methods for pulling apart a host
- * Field `pathStartsWithSlash` removed from `Uri`. This was only intended to be used internally. You can now instead
-   check if `Uri.path` is an instance of `AbsolutePath` to determine if the path will start with slash
+[//]: # (```)
 
-## 0.4.x to 0.5.x
+[//]: # ()
+[//]: # (### Custom encoding)
 
- * Matrix parameters have been removed. If you still need this, raise an issue
- * scala 2.10 support dropped, please upgrade to 2.11 or 2.12 to use scala-uri 0.5.x
- * Scala.js support added
+[//]: # ()
+[//]: # (If you would like to do some custom encoding for specific characters, you can use the `encodeCharAs` encoder.)
 
-## 0.3.x to 0.4.x
+[//]: # ()
+[//]: # (```scala mdoc:reset)
 
- * Package changes / import changes
-  * All code moved from `com.github.theon` package to `com.netaporter` package
-  * `scala-uri` has been organised into the following packages: `encoding`, `decoding`, `config` and `dsl`. You will need to update import statments.
- * Name changes
-  * `PermissiveDecoder` renamed to `PermissivePercentDecoder`
-  * `QueryString` and `MatrixParams` constructor argument `parameters` shortened to `params`
-  * `Uri.parseUri` renamed to `Uri.parse`
-  * `protocol` constructor arg in `Uri` renamed to `scheme`
-  * `Querystring` renamed to `QueryString`
- * Query String constructor argument `parameters` changed type from `Map[String, List[String]]` to `Seq[(String,String)]`
- * `Uri` constructor argument `pathParts` changed type from `List` to `Vector`
- * `Uri` method to add query string parameters renamed from `params` to `addParams`. Same with `matrixParams` -> `addMatrixParams`
- * `PercentEncoderDefaults` object renamed to `PercentEncoder` companion object.
- * Copy methods `user`/`password`/`port`/`host`/`scheme` now all prefixed with `with`, e.g. `withHost`
- * New `UriConfig` case class used to specify encoders, decoders and charset to be used. See examples in [Custom encoding](#custom-encoding), [URL Percent Decoding](#url-percent-decoding) and [Character Sets](#character-sets)
+[//]: # (import io.lemonlabs.uri.Url)
 
-# License
+[//]: # (import io.lemonlabs.uri.config.UriConfig)
 
-`scala-uri` is open source software released under the [Apache 2 License](http://www.apache.org/licenses/LICENSE-2.0).
+[//]: # (import io.lemonlabs.uri.encoding._)
+
+[//]: # ()
+[//]: # (implicit val config: UriConfig = UriConfig&#40;encoder = percentEncode + encodeCharAs&#40;' ', "_"&#41;&#41;)
+
+[//]: # ()
+[//]: # (val uri = Url.parse&#40;"http://theon.github.com/uri with space"&#41;)
+
+[//]: # (uri.toString // This is http://theon.github.com/uri_with_space)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (## URL Percent Decoding)
+
+[//]: # ()
+[//]: # (By Default, `scala-uri` will URL percent decode paths and query string parameters during parsing:)
+
+[//]: # ()
+[//]: # (```scala mdoc:reset)
+
+[//]: # (import io.lemonlabs.uri.Url)
+
+[//]: # ()
+[//]: # (val uri = Url.parse&#40;"http://example.com/i-have-%25been%25-percent-encoded"&#41;)
+
+[//]: # ()
+[//]: # (uri.toString // This is: http://example.com/i-have-%25been%25-percent-encoded)
+
+[//]: # (uri.toStringRaw // This is: http://example.com/i-have-%been%-percent-encoded)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (To prevent this, you can bring the following implicit into scope:)
+
+[//]: # ()
+[//]: # (```scala mdoc:reset)
+
+[//]: # (import io.lemonlabs.uri.Url)
+
+[//]: # (import io.lemonlabs.uri.config.UriConfig)
+
+[//]: # (import io.lemonlabs.uri.decoding.NoopDecoder)
+
+[//]: # ()
+[//]: # (implicit val c: UriConfig = UriConfig&#40;decoder = NoopDecoder&#41;)
+
+[//]: # ()
+[//]: # (val uri = Url.parse&#40;"http://example.com/i-havent-%been%-percent-encoded"&#41;)
+
+[//]: # ()
+[//]: # (uri.toString // This is: http://example.com/i-havent-%25been%25-percent-encoded)
+
+[//]: # (uri.toStringRaw // This is: http://example.com/i-havent-%been%-percent-encoded)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (#### Invalid Percent Encoding)
+
+[//]: # ()
+[//]: # (If your Uri contains invalid percent encoding, by default scala-uri will throw a `UriDecodeException`:)
+
+[//]: # ()
+[//]: # (```scala crash)
+
+[//]: # (Url.parse&#40;"/?x=%3"&#41; // This throws a UriDecodeException)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (You can configure scala-uri to instead ignore invalid percent encoding and *only* percent decode correctly percent encoded values like so:)
+
+[//]: # ()
+[//]: # (```scala mdoc:reset)
+
+[//]: # (import io.lemonlabs.uri.Url)
+
+[//]: # (import io.lemonlabs.uri.config.UriConfig)
+
+[//]: # (import io.lemonlabs.uri.decoding.PercentDecoder)
+
+[//]: # ()
+[//]: # (implicit val c: UriConfig = UriConfig&#40;)
+
+[//]: # (  decoder = PercentDecoder&#40;ignoreInvalidPercentEncoding = true&#41;)
+
+[//]: # (&#41;)
+
+[//]: # (val uri = Url.parse&#40;"/?x=%3"&#41;)
+
+[//]: # (uri.toString // This is /?x=%253)
+
+[//]: # (uri.toStringRaw // This is /?x=%3)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (## Replacing Query String Parameters)
+
+[//]: # ()
+[//]: # (If you wish to replace all existing query string parameters with a given name, you can use the `Url.replaceParams&#40;&#41;` method:)
+
+[//]: # ()
+[//]: # (```scala mdoc:reset)
+
+[//]: # (import io.lemonlabs.uri.Url)
+
+[//]: # ()
+[//]: # (val uri = Url.parse&#40;"http://example.com/path?param=1"&#41;)
+
+[//]: # (val newUri = uri.replaceParams&#40;"param", "2"&#41;)
+
+[//]: # ()
+[//]: # (newUri.toString // This is: http://example.com/path?param=2)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (## Removing Query String Parameters)
+
+[//]: # ()
+[//]: # (If you wish to remove all existing query string parameters with a given name, you can use the `uri.removeParams&#40;&#41;` method:)
+
+[//]: # ()
+[//]: # (```scala mdoc:reset)
+
+[//]: # (import io.lemonlabs.uri.Url)
+
+[//]: # ()
+[//]: # (val uri = Url.parse&#40;"http://example.com/path?param=1&param2=2"&#41;)
+
+[//]: # (val newUri = uri.removeParams&#40;"param"&#41;)
+
+[//]: # ()
+[//]: # (newUri.toString // This is: http://example.com/path?param2=2)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (## Omitting Query Parameters with value `None`)
+
+[//]: # ()
+[//]: # (scala-uri has support for not rendering query parameters that have a value of `None`. Set `renderQuery = ExcludeNones`)
+
+[//]: # (in your `UriConfig` and make it visible in the scope where you parse/create your `Url`)
+
+[//]: # ()
+[//]: # (```scala mdoc:reset)
+
+[//]: # (import io.lemonlabs.uri.Url)
+
+[//]: # (import io.lemonlabs.uri.config._)
+
+[//]: # ()
+[//]: # (implicit val config: UriConfig = UriConfig&#40;renderQuery = ExcludeNones&#41;)
+
+[//]: # ()
+[//]: # (val url = Url.parse&#40;"http://github.com/lemonlabsuk"&#41;.addParams&#40;"a" -> Some&#40;"some"&#41;, "b" -> None&#41;)
+
+[//]: # (url.toString // This is http://github.com/lemonlabsuk?a=some)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (## Get query string parameters)
+
+[//]: # ()
+[//]: # (To get the query string parameters as a `Map[String,Seq[String]]` you can do the following:)
+
+[//]: # ()
+[//]: # (```scala mdoc:reset)
+
+[//]: # (import io.lemonlabs.uri.Url)
+
+[//]: # ()
+[//]: # (val uri = Url.parse&#40;"http://example.com/path?a=b&a=c&d=e"&#41;)
+
+[//]: # (uri.query.paramMap // This is: Map&#40;"a" -> Vector&#40;"b", "c"&#41;, "d" -> Vector&#40;"e"&#41;&#41;)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (## User Information)
+
+[//]: # ()
+[//]: # (`scala-uri` supports user information &#40;username and password&#41; encoded in URLs.)
+
+[//]: # ()
+[//]: # (Parsing URLs with user information:)
+
+[//]: # ()
+[//]: # (```scala mdoc:reset)
+
+[//]: # (import io.lemonlabs.uri.Url)
+
+[//]: # ()
+[//]: # (val url = Url.parse&#40;"http://user:pass@host.com"&#41;)
+
+[//]: # (url.user // This is Some&#40;"user"&#41;)
+
+[//]: # (url.password // This is Some&#40;"pass"&#41;)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (Modifying user information:)
+
+[//]: # ()
+[//]: # (```scala mdoc:reset)
+
+[//]: # (import io.lemonlabs.uri.AbsoluteUrl)
+
+[//]: # ()
+[//]: # (val url = AbsoluteUrl.parse&#40;"http://host.com"&#41;)
+
+[//]: # (url.withUser&#40;"jack"&#41; // URL is now http://jack@host.com)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (```scala mdoc:reset)
+
+[//]: # (import io.lemonlabs.uri.AbsoluteUrl)
+
+[//]: # ()
+[//]: # (val url = AbsoluteUrl.parse&#40;"http://user:pass@host.com"&#41;)
+
+[//]: # (url.withPassword&#40;"secret"&#41; // URL is now http://user:secret@host.com)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (**Note:** that using clear text passwords in URLs is [ill advised]&#40;http://tools.ietf.org/html/rfc3986#section-3.2.1&#41;)
+
+[//]: # ()
+[//]: # (## Protocol Relative URLs)
+
+[//]: # ()
+[//]: # ([Protocol Relative URLs]&#40;http://paulirish.com/2010/the-protocol-relative-url/&#41; are supported in `scala-uri`. A `Uri` object with a protocol of `None`, but a host of `Some&#40;x&#41;` will be considered a protocol relative URL.)
+
+[//]: # ()
+[//]: # (```scala mdoc:reset)
+
+[//]: # (import io.lemonlabs.uri.Url)
+
+[//]: # ()
+[//]: # (val uri = Url.parse&#40;"//example.com/path"&#41; // Return type is Url)
+
+[//]: # (uri.schemeOption // This is: None)
+
+[//]: # (uri.hostOption // This is: Some&#40;"example.com"&#41;)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (Use `ProtocolRelativeUrl.parse` if you know your URL will always be Protocol Relative:)
+
+[//]: # ()
+[//]: # (```scala mdoc:reset)
+
+[//]: # (import io.lemonlabs.uri.ProtocolRelativeUrl)
+
+[//]: # ()
+[//]: # (val uri = ProtocolRelativeUrl.parse&#40;"//example.com/path"&#41; // Return type is ProtocolRelativeUrl)
+
+[//]: # (uri.schemeOption // This is: None)
+
+[//]: # (uri.host // This is: "example.com")
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (## Character Sets)
+
+[//]: # ()
+[//]: # (By default `scala-uri` uses `UTF-8` charset encoding:)
+
+[//]: # ()
+[//]: # (```scala mdoc:reset)
+
+[//]: # (import io.lemonlabs.uri.Url)
+
+[//]: # ()
+[//]: # (val uri = Url.parse&#40;"http://theon.github.com/uris-in-scala.html?chinese=网址"&#41;)
+
+[//]: # (uri.toString // This is http://theon.github.com/uris-in-scala.html?chinese=%E7%BD%91%E5%9D%80)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (This can be changed like so:)
+
+[//]: # ()
+[//]: # (```scala mdoc:reset)
+
+[//]: # (import io.lemonlabs.uri.config.UriConfig)
+
+[//]: # (import io.lemonlabs.uri.Url)
+
+[//]: # ()
+[//]: # (implicit val conf: UriConfig = UriConfig&#40;charset = "GB2312"&#41;)
+
+[//]: # ()
+[//]: # (val uri = Url.parse&#40;"http://theon.github.com/uris-in-scala.html?chinese=网址"&#41;)
+
+[//]: # (uri.toString // This is http://theon.github.com/uris-in-scala.html?chinese=%CD%F8%D6%B7)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (## Subdomains)
+
+[//]: # ()
+[//]: # (```scala mdoc:reset)
+
+[//]: # (import io.lemonlabs.uri.Url)
+
+[//]: # ()
+[//]: # (// This returns Some&#40;"www"&#41;)
+
+[//]: # (Url.parse&#40;"http://www.example.com/blah"&#41;.subdomain)
+
+[//]: # ()
+[//]: # (// This returns Some&#40;"a.b.c"&#41;)
+
+[//]: # (Url.parse&#40;"http://a.b.c.example.com/blah"&#41;.subdomain)
+
+[//]: # ()
+[//]: # (// This returns None)
+
+[//]: # (Url.parse&#40;"http://example.com/blah"&#41;.subdomain)
+
+[//]: # ()
+[//]: # (// This returns Vector&#40;"a", "a.b", "a.b.c", "a.b.c.example"&#41;)
+
+[//]: # (Url.parse&#40;"http://a.b.c.example.com/blah"&#41;.subdomains)
+
+[//]: # ()
+[//]: # (// This returns Some&#40;"a"&#41;)
+
+[//]: # (Url.parse&#40;"http://a.b.c.example.com/blah"&#41;.shortestSubdomain)
+
+[//]: # ()
+[//]: # (// This returns Some&#40;"a.b.c.example"&#41;)
+
+[//]: # (Url.parse&#40;"http://a.b.c.example.com/blah"&#41;.longestSubdomain)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (These methods return `None` or `Vector.empty` for URLs without a Host &#40;e.g. Relative URLs&#41;)
+
+[//]: # ()
+[//]: # (## Apex Domains)
+
+[//]: # ()
+[//]: # (The method `apexDomain` returns the [apex domain]&#40;https://help.github.com/articles/about-supported-custom-domains/#apex-domains&#41;)
+
+[//]: # (for the URL &#40;e.g. `example.com` for `http://www.example.com/path`&#41;)
+
+[//]: # ()
+[//]: # (```scala mdoc:reset)
+
+[//]: # (import io.lemonlabs.uri.Url)
+
+[//]: # ()
+[//]: # (val uri = Url.parse&#40;"http://www.google.co.uk/blah"&#41;)
+
+[//]: # (uri.apexDomain // This returns Some&#40;"google.co.uk"&#41;)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (## Public Suffixes)
+
+[//]: # ()
+[//]: # (`scala-uri` uses the list of public suffixes from [publicsuffix.org]&#40;https://publicsuffix.org&#41; to allow you to identify)
+
+[//]: # (the TLD of your absolute URIs.)
+
+[//]: # ()
+[//]: # (The `publicSuffix` method returns the longest public suffix from your URI)
+
+[//]: # ()
+[//]: # (```scala mdoc:reset)
+
+[//]: # (import io.lemonlabs.uri.Url)
+
+[//]: # ()
+[//]: # (val uri = Url.parse&#40;"http://www.google.co.uk/blah"&#41;)
+
+[//]: # (uri.publicSuffix // This returns Some&#40;"co.uk"&#41;)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (The `publicSuffixes` method returns all the public suffixes from your URI)
+
+[//]: # ()
+[//]: # (```scala mdoc:reset)
+
+[//]: # (import io.lemonlabs.uri.Url)
+
+[//]: # ()
+[//]: # (val uri = Url.parse&#40;"http://www.google.co.uk/blah"&#41;)
+
+[//]: # (uri.publicSuffixes // This returns Vector&#40;"co.uk", "uk"&#41;)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (These methods return `None` and `Vector.empty`, respectively for URLs without a Host &#40;e.g. Relative URLs&#41;)
+
+[//]: # ()
+[//]: # (## Punycode)
+
+[//]: # ()
+[//]: # (See [RFC 3490]&#40;http://www.ietf.org/rfc/rfc3490.txt&#41;)
+
+[//]: # ()
+[//]: # (```scala mdoc:reset)
+
+[//]: # (import io.lemonlabs.uri.Url)
+
+[//]: # ()
+[//]: # (val url = Url.parse&#40;"https://はじめよう.みんな/howto.html"&#41;)
+
+[//]: # (url.toStringPunycode // This returns "https://xn--p8j9a0d9c9a.xn--q9jyb4c/howto.html")
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (## mailto)
+
+[//]: # ()
+[//]: # (Mailto URLs are best parsed with `UrlWithoutAuthority.parse`, but can also be parsed with `Url.parse`)
+
+[//]: # ()
+[//]: # (```scala mdoc:reset)
+
+[//]: # (import io.lemonlabs.uri.UrlWithoutAuthority)
+
+[//]: # ()
+[//]: # (val mailto = UrlWithoutAuthority.parse&#40;"mailto:someone@example.com?subject=Hello"&#41;)
+
+[//]: # (mailto.scheme // This is Some&#40;mailto"&#41;)
+
+[//]: # (mailto.path // This is "someone@example.com")
+
+[//]: # (mailto.query.param&#40;"subject"&#41; // This is Some&#40;"Hello"&#41;)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (## Data URLs)
+
+[//]: # ()
+[//]: # (Data URLs are defined in [RFC2397]&#40;https://tools.ietf.org/html/rfc2397&#41;)
+
+[//]: # ()
+[//]: # (### Base64 encoded data URLs)
+
+[//]: # ()
+[//]: # (```scala mdoc:reset)
+
+[//]: # (import java.io.ByteArrayInputStream)
+
+[//]: # (import io.lemonlabs.uri.DataUrl)
+
+[//]: # (import javax.imageio.ImageIO)
+
+[//]: # ()
+[//]: # (// A data URL containing a PNG image of a red dot)
+
+[//]: # (val dataUrl = DataUrl.parse&#40;"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="&#41;)
+
+[//]: # ()
+[//]: # (dataUrl.scheme // This is "data")
+
+[//]: # (dataUrl.mediaType.value // This is "image/png")
+
+[//]: # (dataUrl.base64 // This is true)
+
+[//]: # ()
+[//]: # (// Convert the image data to a java.awt.image.BufferedImage)
+
+[//]: # (val image = ImageIO.read&#40;new ByteArrayInputStream&#40;dataUrl.data&#41;&#41;)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (### Percent encoded data URLs)
+
+[//]: # ()
+[//]: # (```scala mdoc:reset)
+
+[//]: # (import io.lemonlabs.uri.DataUrl)
+
+[//]: # ()
+[//]: # (val dataUrl = DataUrl.parse&#40;"data:text/plain;charset=UTF-8;page=21,the%20data:1234,5678"&#41;)
+
+[//]: # ()
+[//]: # (dataUrl.mediaType.value // This is text/plain)
+
+[//]: # (dataUrl.mediaType.charset // This is UTF-8)
+
+[//]: # (dataUrl.mediaType.parameters // This is Vector&#40;"charset" -> "UTF-8", "page" -> "21"&#41;)
+
+[//]: # (dataUrl.base64 // This is false)
+
+[//]: # ()
+[//]: # (dataUrl.dataAsString // This is "the data:1234,5678")
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (## git/scp style URLs)
+
+[//]: # ()
+[//]: # (git/scp style URLs can be parsed like so:)
+
+[//]: # ()
+[//]: # (```scala mdoc:reset)
+
+[//]: # (import io.lemonlabs.uri.ScpLikeUrl)
+
+[//]: # ()
+[//]: # (val url = ScpLikeUrl.parse&#40;"git@github.com:lemonlabsuk/scala-uri.git"&#41;)
+
+[//]: # (url.user // This is Some&#40;"git"&#41;)
+
+[//]: # (url.host.toString // This is "github.com")
+
+[//]: # (url.path.toString // This is "lemonlabsuk/scala-uri.git")
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (Note that `ScpLikeUrl.parse`, should only be used for git URLs with scp-like syntax &#40;with a `:`)
+
+[//]: # (between the host and path&#41;. For all other git URLs, `AbsoluteUrl.parse` or `Url.parse` should)
+
+[//]: # (be used:)
+
+[//]: # ()
+[//]: # (```scala mdoc:reset)
+
+[//]: # (import io.lemonlabs.uri.AbsoluteUrl)
+
+[//]: # ()
+[//]: # (val gitUrl    = AbsoluteUrl.parse&#40;"git://github.com/lemonlabsuk/scala-uri.git"&#41;)
+
+[//]: # (val gitSshUrl = AbsoluteUrl.parse&#40;"git+ssh://git@github.com/lemonlabsuk/scala-uri.git"&#41;)
+
+[//]: # (val sshUrl    = AbsoluteUrl.parse&#40;"ssh://git@github.com/lemonlabsuk/scala-uri.git"&#41;)
+
+[//]: # (val httpsUrl  = AbsoluteUrl.parse&#40;"https://github.com/lemonlabsuk/scala-uri.git"&#41;)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (## Typesafe URL builder DSL)
+
+[//]: # ()
+[//]: # (The version of DSL which relies on the types to render urls providing better control over)
+
+[//]: # (the way values would be translated to url parts.)
+
+[//]: # ()
+[//]: # (It is possible to use arbitrary types as parts of the url:)
+
+[//]: # ()
+[//]: # (### Query Strings)
+
+[//]: # ()
+[//]: # (```scala mdoc:reset)
+
+[//]: # (import io.lemonlabs.uri.typesafe._)
+
+[//]: # (import io.lemonlabs.uri.typesafe.dsl._)
+
+[//]: # ()
+[//]: # (final case class Foo&#40;a: Int, b: String&#41;)
+
+[//]: # ()
+[//]: # (object Foo {)
+
+[//]: # (  implicit val traversableParams: TraversableParams[Foo] = TraversableParams.product)
+
+[//]: # (})
+
+[//]: # ()
+[//]: # (val uri = "http://theon.github.com/scala-uri" addParams Foo&#40;a = 1, b = "bar"&#41;)
+
+[//]: # (uri.toString //This is: http://theon.github.com/scala-uri?a=1&b=bar)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (### Query String Values)
+
+[//]: # ()
+[//]: # (```scala mdoc:reset)
+
+[//]: # (import io.lemonlabs.uri.typesafe._)
+
+[//]: # (import io.lemonlabs.uri.typesafe.dsl._)
+
+[//]: # ()
+[//]: # (sealed trait Bar {)
+
+[//]: # (  def name: String)
+
+[//]: # (})
+
+[//]: # ()
+[//]: # (case object A extends Bar {)
+
+[//]: # (  val name: String = "A")
+
+[//]: # (})
+
+[//]: # ()
+[//]: # (case object B extends Bar {)
+
+[//]: # (  val name: String = "B")
+
+[//]: # (})
+
+[//]: # ()
+[//]: # (object Bar {)
+
+[//]: # (  implicit val queryValue: QueryValue[Bar] = QueryValue.derive[Bar].by&#40;_.name&#41;)
+
+[//]: # (})
+
+[//]: # ()
+[//]: # (val uri = "http://theon.github.com/scala-uri" ? &#40;"foo" -> A&#41;)
+
+[//]: # (uri.toString //This is: http://theon.github.com/scala-uri?foo=A)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (### Path Parts)
+
+[//]: # ()
+[//]: # (```scala mdoc:reset)
+
+[//]: # (import io.lemonlabs.uri.typesafe._)
+
+[//]: # (import io.lemonlabs.uri.typesafe.dsl._)
+
+[//]: # ()
+[//]: # (final case class Foo&#40;a: String, b: Int&#41;)
+
+[//]: # ()
+[//]: # (object Foo {)
+
+[//]: # (  implicit val pathPart: PathPart[Foo] = &#40;foo: Foo&#41; => s"${foo.a}/${foo.b}")
+
+[//]: # (})
+
+[//]: # ()
+[//]: # ()
+[//]: # (val uri = "http://theon.github.com" / "scala-uri" / Foo&#40;a = "user", b = 1&#41;)
+
+[//]: # (uri.toString //This is: http://theon.github.com/scala-uri/user/1)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (### Fragments)
+
+[//]: # ()
+[//]: # (```scala mdoc:reset)
+
+[//]: # (import io.lemonlabs.uri.typesafe._)
+
+[//]: # (import io.lemonlabs.uri.typesafe.dsl._)
+
+[//]: # ()
+[//]: # (final case class Foo&#40;a: String, b: Int&#41;)
+
+[//]: # (object Foo {)
+
+[//]: # (  implicit val fragment: Fragment[Foo] = &#40;foo: Foo&#41; => Some&#40;s"${foo.a}-${foo.b}"&#41;)
+
+[//]: # (})
+
+[//]: # ()
+[//]: # (val uri5 = "http://theon.github.com/scala-uri" `#` Foo&#40;a = "user", b = 1&#41;)
+
+[//]: # (uri5.toString //This is: http://theon.github.com/scala-uri#user-1)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (## Scala.js support)
+
+[//]: # ()
+[//]: # (See [scala-uri-scalajs-example]&#40;https://github.com/lemonlabsuk/scala-uri-scalajs-example&#41; for usage)
+
+[//]: # ()
+[//]: # (## Cats Support)
+
+[//]: # ()
+[//]: # (scala-uri provides type class instances of `cats.Eq`, `cats.Show` and `cats.Order` for:)
+
+[//]: # (`Uri `, `Url`, `RelativeUrl`, `UrlWithAuthority`, `ProtocolRelativeUrl`, `AbsoluteUrl`,)
+
+[//]: # (`UrlWithoutAuthority`, `SimpleUrlWithoutAuthority`, `DataUrl`, `ScpLikeUrl`, `Urn`, `Authority`, `UserInfo`,)
+
+[//]: # (`Host`, `DomainName`, `IpV4`, `IpV6`, `MediaType`, `Path`, `UrlPath`, `AbsoluteOrEmptyPath`,)
+
+[//]: # (`RootlessPath`, `AbsolutePath`, `UrnPath`, `QueryString`)
+
+[//]: # ()
+[//]: # (The type class instances exist in the companion objects for these types.)
+
+[//]: # ()
+[//]: # (## Including scala-uri your project)
+
+[//]: # ()
+[//]: # (`scala-uri` `4.x.x` is currently built with support for Scala `3`, Scala `2.13.x`, Scala `2.12.x` and Scala.js `1.17.0+`)
+
+[//]: # ()
+[//]: # (Release builds are available in maven central. For SBT users just add the following dependency:)
+
+[//]: # ()
+[//]: # (```scala)
+
+[//]: # ("com.indoorvivants" %% "scala-uri" % "4.1.0")
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (For maven users you should use &#40;for 2.13.x&#41;:)
+
+[//]: # ()
+[//]: # (```xml)
+
+[//]: # (<dependency>)
+
+[//]: # (    <groupId>com.indoorvivants</groupId>)
+
+[//]: # (    <artifactId>scala-uri_2.13</artifactId>)
+
+[//]: # (    <version>4.1.0</version>)
+
+[//]: # (</dependency>)
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (# Contributions)
+
+[//]: # ()
+[//]: # (Contributions to `scala-uri` are always welcome. Check out the [Contributing Guidelines]&#40;https://github.com/indoorvivants/scala-uri/blob/master/README.md&#41;)
+
+[//]: # ()
+[//]: # (# Migration guides)
+
+[//]: # ()
+[//]: # (## 3.x.x to 4.x.x)
+
+[//]: # ()
+[//]: # ( * Scala 3 support has been added. Scala 2.13 and 2.12 support remain)
+
+[//]: # ( * *Binary Incompatibility*: [4765b4e]&#40;https://github.com/lemonlabsuk/scala-uri/commit/4765b4e6714a87d53ba0ae9bf58810e1b8be63d5#diff-e33d822268175cadb9ff5e2057fac2042db550f251da28d834f13b7bb44cf09aL45&#41;)
+
+[//]: # (   removed a single `UriConfig.copy&#40;&#41;` overload.)
+
+[//]: # (   This overload existed only to maintain binary compatibility with an older version of scala-uri)
+
+[//]: # (   Use the remaining `copy&#40;&#41;` method on `UriConfig` instead)
+
+[//]: # ( * *Binary Incompatibility*: [4765b4e]&#40;https://github.com/lemonlabsuk/scala-uri/commit/4765b4e6714a87d53ba0ae9bf58810e1b8be63d5#diff-e33d822268175cadb9ff5e2057fac2042db550f251da28d834f13b7bb44cf09aL20&#41;)
+
+[//]: # (   removed a single `UriConfig` overloaded constructor.)
+
+[//]: # (   This overload existed only to maintain binary compatibility with an older version of scala-uri)
+
+[//]: # (   Use the remaining constructor or `apply` method remaining on `UriConfig` instead)
+
+[//]: # ()
+[//]: # (## 2.x.x to 3.x.x)
+
+[//]: # ()
+[//]: # ( * *Backwards Incompatible*: The space character is now encoded to `+` instead of `%20` in query string parameters by default.)
+
+[//]: # ( * *Backwards Incompatible*: The `+` method in `io.lemonlabs.uri.encoding.UriEncoder`, now chains encoders in the opposite order to be more intuitive.)
+
+[//]: # (   E.g. `a + b` will encode with encoder `a` first, followed by encoder `b`)
+
+[//]: # ( * *Binary Incompatibility*: The following deprecated classes have now been removed:)
+
+[//]: # (    * `io.lemonlabs.uri.inet.PublicSuffixTrie`)
+
+[//]: # (    * `io.lemonlabs.uri.inet.Trie`)
+
+[//]: # (    * `io.lemonlabs.uri.dsl.*`)
+
+[//]: # ( * *Binary Incompatibility*: `Url.addParam&#40;"key", "value"&#41;` and `Url.addParam&#40;"key" -> "value"&#41;`)
+
+[//]: # (   now has a return type `Self` rather than `Url`.)
+
+[//]: # (   E.g. `AbsoluteUrl.addParam` now has a return type of `AbsoluteUrl` and `RelativeUrl.addParam` has a return type of `RelativeUrl`)
+
+[//]: # ()
+[//]: # (## 1.x.x to 2.x.x)
+
+[//]: # ()
+[//]: # ( * scala-uri no longer depends on a JSON library.)
+
+[//]: # ( * *Binary Incompatibility*: The case class `UrlWithoutAuthority` has been renamed `SimpleUrlWithoutAuthority`.)
+
+[//]: # (   There is now a trait called `UrlWithoutAuthority`. This trait has a companion object with `apply`, `unapply` and `parse`)
+
+[//]: # (   methods, so it mostly can be used in the same way as the previous case class.)
+
+[//]: # ( * *Binary Incompatibility*: Parsing a Data URL will now return an instance of [`DataUrl`]&#40;#data-urls&#41; rather than `UrlWithoutAuthority`)
+
+[//]: # ( * *Binary Incompatibility*: `UserInfo.user` is now of type `String` rather than `Option[String]`)
+
+[//]: # ( * *Binary Incompatibility*: `Authority.userInfo` is now of type `Option[UserInfo]`)
+
+[//]: # ( * *Binary Incompatibility*: `UserInfo.empty` method removed)
+
+[//]: # ( * *Binary Incompatibility*: `QueryString.fromPairOptions` removed. Use `QueryString.fromPairs` instead.)
+
+[//]: # ( * *Binary Incompatibility*: `Url.withQueryStringOptionValues` removed. Use `withQueryString` instead.)
+
+[//]: # ( * *Binary Incompatibility*: `Url.addParamsOptionValues` and `QueryString.addParamsOptionValues` have been renames to `addParams`)
+
+[//]: # ( * `TypesafeUrlDsl`)
+
+[//]: # (    * *Binary Incompatibility*: `withParams[A: TraversableParams]&#40;params: A&#41;` renamed to `addParams`)
+
+[//]: # (    * `/&#40;PathPart&#41;` no longer splits the part by slash. If you want to add multiple path parts use `/&#40;TraversablePathParts&#41;` instead)
+
+[//]: # ( * Type Classes)
+
+[//]: # (   * *Binary Incompatibility*: `Fragment[A].fragment` returns `Option[String]` rather than `String`)
+
+[//]: # (   * *Binary Incompatibility*: `Url.withFragment` now takes argument of type `T: Fragment` rather than `String` and `Option[String]`)
+
+[//]: # (     Type Class instances are provided the method can be used with `String` and `Option[String]` values just as before)
+
+[//]: # (   * *Binary Incompatibility*: `Url.addPathParts` and `Url.addPathPart` now takes arguments of type `P: TraversablePathParts` or `P: PathPart` rather than `Iterable[String]` or `String`)
+
+[//]: # (     Type Class instances are provided the methods can be used with `String` and `Iterable[String]` values just as before)
+
+[//]: # (   * *Binary Incompatibility*: `Url.withQueryString`, `Url.addParam`, `Url.addParams`, `Url.replaceParams`, `Url.removeParams`,)
+
+[//]: # (     `Url.mapQuery`, `Url.flatMapQuery`, `Url.collectQuery`, `Url.mapQueryNames` and `Url.mapQueryValues` now takes argument of type `KV: QueryKeyValue`, `K: QueryKey` or `V: QueryValue` rather than `&#40;String, String&#41;` or `String`)
+
+[//]: # (     Type Class instances are provided the methods can be used with `&#40;String, String&#41;` or `String` values just as before)
+
+[//]: # ( * The [URL builder DSL]&#40;#url-builder-dsl&#41; has been deprecated in favour of the [Typesafe URL builder DSL]&#40;#typesafe-url-builder-dsl&#41;)
+
+[//]: # ( * `Authority.parse` no longer expects it's string argument to start with `//`, as this is not part of the Authority, it is a delimiter. See [RFC 3986]&#40;https://www.ietf.org/rfc/rfc3986.txt&#41;)
+
+[//]: # ( * `UserInfo.parse` no longer expects it's string argument to end with a `@`, as this is not part of the UserInfo, it is a delimiter. See [RFC 3986]&#40;https://www.ietf.org/rfc/rfc3986.txt&#41;)
+
+[//]: # ( * `QueryString.toString` no longer returns a leading `?`, as this is not part of the query string, it is a delimiter. See [RFC 3986]&#40;https://www.ietf.org/rfc/rfc3986.txt&#41;)
+
+[//]: # ( * Forward slashes in paths are now percent encoded by default.)
+
+[//]: # (   This means `Url.parse&#40;"/%2F/"&#41;.toString` returns `"/%2F/"` rather than `///` in previous versions)
+
+[//]: # (   To return to the previous behavior, you can bring a `UriConfig` like so into scope)
+
+[//]: # (   ```scala mdoc:reset)
+
+[//]: # (    import io.lemonlabs.uri.encoding.PercentEncoder._)
+
+[//]: # (    implicit val c = UriConfig.default.copy&#40;pathEncoder = PercentEncoder&#40;PATH_CHARS_TO_ENCODE - '/'&#41;&#41;)
+
+[//]: # (   ```)
+
+[//]: # ()
+[//]: # (## 1.x.x to 1.5.x)
+
+[//]: # ()
+[//]: # ( * scala 2.11 support dropped, please upgrade to 2.12 or 2.13)
+
+[//]: # ()
+[//]: # (## 0.5.x to 1.x.x)
+
+[//]: # ()
+[//]: # (Thanks to [@evanbennett]&#40;https://github.com/evanbennett&#41;. `1.x.x` is inspired by his fork [here]&#40;https://github.com/evanbennett/scala-uri&#41;)
+
+[//]: # (and discussion [here]&#40;https://github.com/NET-A-PORTER/scala-uri/pull/113&#41;.)
+
+[//]: # ()
+[//]: # ( * Package change from `com.netaporter.uri` to `io.lemonlabs.uri`)
+
+[//]: # ( * The single `Uri` case class has now been replaced with a class hierarchy. Use the most specific class in this)
+
+[//]: # (   hierarchy that fits your use case)
+
+[//]: # ( * `Uri` used to be a case class, but the replacements `Uri` and `Url` are now traits. This means they no longer)
+
+[//]: # (   have a `copy` method. Use the `with` methods instead &#40;e.g. `withHost`, `withPath` etc&#41;)
+
+[//]: # ( * `host` method on `Url` now has return type `Host` rather than `String`. You may have to change `url.host` to `url.host.toString`)
+
+[//]: # ( * `path` method on `Url` now has return type `Path` rather than `String`. You may have to change `url.path` to `url.path.toString`)
+
+[//]: # ( * Changed parameter value type from `Any` to `String` in methods `addParam`, `addParams`, `replaceParams`.)
+
+[//]: # (   Please now call `.toString` before passing non String types to these methods)
+
+[//]: # ( * Changed parameter value type from `Option[Any]` to `Option[String]` in method `replaceAll`.)
+
+[//]: # (   Please now call `.toString` before passing non String types to this method)
+
+[//]: # ( * Query string parameters with a value of `None` will now be rendered with no equals sign by default &#40;e.g. `?param`&#41;.)
+
+[//]: # (   Previously some methods &#40;such as `?`, `&`, `\?`, `addParam` and `addParams`&#41; would not render parameters with a value of `None` at all.)
+
+[//]: # (   In 1.x.x, this behaviour can be achieved by using the [`renderQuery`]&#40;#omitting-query-parameters-with-value-none&#41; config option.)
+
+[//]: # ( * In most cases `Url.parse` should be used instead of `Uri.parse`. See all parse methods [here]&#40;#parse-a-url&#41;)
+
+[//]: # ( * `scheme` is now called `schemeOption` on `Uri`. If you have an instance of `AbsoluteUrl` or `ProtocolRelativeUrl`)
+
+[//]: # (   there is still `scheme` method but it returns `String` rather than `Option[String]`)
+
+[//]: # ( * `protocol` method has been removed from `Uri`. Use `schemeOption` instead)
+
+[//]: # ( * Type changed from `Seq` to `Vector` for:)
+
+[//]: # (   * `subdomains`, `publicSuffixes`, `params` return type)
+
+[//]: # (   * `removeAll` and `removeParams` argument types)
+
+[//]: # (   * `params` field in `QueryString`)
+
+[//]: # (   * `paramMap` and `pathParts` fields in `Uri`, now `Url`)
+
+[//]: # ( * Methods `addParam` and `addParams`  that took Option arguments are now called `addParamOptionValue` and `addParamsOptionValues`)
+
+[//]: # ( * Method `replaceAllParams` has been replaced with `withQueryString` or `withQueryStringOptionValues`)
+
+[//]: # ( * Method `removeAllParams` has been replaced with `withQueryString&#40;QueryString.empty&#41;`)
+
+[//]: # ( * Method `subdomain` has been removed from the Scala.js version. The implementation was incorrect and did not)
+
+[//]: # (   match the JVM version of `subdomain`. Once public suffixes are supported for the Scala.js version, a correct)
+
+[//]: # (   implementation of `subdomain` can be added)
+
+[//]: # ( * Implicit `UriConfig`s now need to be where your `Uri`s are parsed/constructed, rather than where they are rendered)
+
+[//]: # ( * Method `hostParts` has been removed from `Uri`. This method predated `publicSuffix` and `subdomain` which are more)
+
+[//]: # (   useful methods for pulling apart a host)
+
+[//]: # ( * Field `pathStartsWithSlash` removed from `Uri`. This was only intended to be used internally. You can now instead)
+
+[//]: # (   check if `Uri.path` is an instance of `AbsolutePath` to determine if the path will start with slash)
+
+[//]: # ()
+[//]: # (## 0.4.x to 0.5.x)
+
+[//]: # ()
+[//]: # ( * Matrix parameters have been removed. If you still need this, raise an issue)
+
+[//]: # ( * scala 2.10 support dropped, please upgrade to 2.11 or 2.12 to use scala-uri 0.5.x)
+
+[//]: # ( * Scala.js support added)
+
+[//]: # ()
+[//]: # (## 0.3.x to 0.4.x)
+
+[//]: # ()
+[//]: # ( * Package changes / import changes)
+
+[//]: # (  * All code moved from `com.github.theon` package to `com.netaporter` package)
+
+[//]: # (  * `scala-uri` has been organised into the following packages: `encoding`, `decoding`, `config` and `dsl`. You will need to update import statments.)
+
+[//]: # ( * Name changes)
+
+[//]: # (  * `PermissiveDecoder` renamed to `PermissivePercentDecoder`)
+
+[//]: # (  * `QueryString` and `MatrixParams` constructor argument `parameters` shortened to `params`)
+
+[//]: # (  * `Uri.parseUri` renamed to `Uri.parse`)
+
+[//]: # (  * `protocol` constructor arg in `Uri` renamed to `scheme`)
+
+[//]: # (  * `Querystring` renamed to `QueryString`)
+
+[//]: # ( * Query String constructor argument `parameters` changed type from `Map[String, List[String]]` to `Seq[&#40;String,String&#41;]`)
+
+[//]: # ( * `Uri` constructor argument `pathParts` changed type from `List` to `Vector`)
+
+[//]: # ( * `Uri` method to add query string parameters renamed from `params` to `addParams`. Same with `matrixParams` -> `addMatrixParams`)
+
+[//]: # ( * `PercentEncoderDefaults` object renamed to `PercentEncoder` companion object.)
+
+[//]: # ( * Copy methods `user`/`password`/`port`/`host`/`scheme` now all prefixed with `with`, e.g. `withHost`)
+
+[//]: # ( * New `UriConfig` case class used to specify encoders, decoders and charset to be used. See examples in [Custom encoding]&#40;#custom-encoding&#41;, [URL Percent Decoding]&#40;#url-percent-decoding&#41; and [Character Sets]&#40;#character-sets&#41;)
+
+[//]: # ()
+[//]: # (# License)
+
+[//]: # ()
+[//]: # (`scala-uri` is open source software released under the [Apache 2 License]&#40;http://www.apache.org/licenses/LICENSE-2.0&#41;.)
